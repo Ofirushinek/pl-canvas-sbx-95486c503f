@@ -1,0 +1,2665 @@
+/* =============================================================================
+   PRODUCT LAB — WORKSHOP ONE-PAGER (productlab.studio)
+   Standalone marketing page. Tokens ported VERBATIM from the Product Lab design
+   system (product-lab-studio/src/index.css). No inline hex in markup. Warm paper
+   + ink, violet secondary accent, Inter, 8px radius grid. Full RTL support.
+   ========================================================================== */
+
+/* ---- TOKENS (verbatim from Product Lab system) --------------------------- */
+:root {
+  --pl-bg: #f6f5f2;
+  --pl-bg-alt: #efeae2;
+  --pl-surface: #ffffff;
+  --pl-elevated: #ffffff;
+
+  --pl-fg: #0a0a0a;
+  --pl-fg-body: #26262b;
+  --pl-fg-secondary: #6b6b73;
+  --pl-fg-muted: #9a9aa3;
+
+  --pl-border: rgb(10 10 10 / 0.16);
+  --pl-border-strong: rgb(10 10 10 / 0.26);
+
+  --pl-accent: #7c3aed;
+  --pl-accent-hover: #6d28d9;
+  --pl-accent-fg: #ffffff;
+
+  --pl-grid-dot: rgb(10 10 10 / 0.05);
+  --pl-illo-bg: #ece8f5;
+
+  /* Brand cream — the logo spec's brand ground. Was defined only in the intro
+     overlay's own stylesheet (assets/intro.css); promoted into the core
+     palette (Ofir, 2026-09-07) since it's also the full background of a real
+     page (#/kit). intro.css now points its own --pl-intro-cream at this. */
+  --pl-brand-cream: #FBEAD9;
+
+  /* tooltip — dark bubble for icon-only controls (design-system token) */
+  --pl-tooltip-bg: #1a1a1a;
+  --pl-tooltip-fg: #ffffff;
+
+  /* modal/overlay scrim — was a raw rgb() literal with no token (DSL, 2026-09-07) */
+  --pl-scrim: rgb(10 8 6 / 0.55);
+
+  /* crew palette — the felt-puppet character colors, for playful accents */
+  --pl-crew-orange: #e0763c;
+  --pl-crew-teal: #3f9a97;
+  --pl-crew-purple: #8b6fc0;
+  --pl-crew-yellow: #d99b33;
+
+  /* CRM funnel-stage colors (admin students table). Semantic status tokens, not
+     brand colors: purple/teal/gray reuse the existing palette; blue/green/red are
+     new status hues a 6-stage funnel needs. Defined once here, referenced only by
+     .roster__stage--* (never inline). */
+  --pl-stage-invited: var(--pl-fg-muted);   /* gray: sent, no reply */
+  --pl-stage-interested: #2563eb;            /* blue: replied with pull */
+  --pl-stage-call_booked: var(--pl-accent);  /* purple: intro call set */
+  --pl-stage-confirmed: #15803d;             /* green: seat locked */
+  --pl-stage-attended: var(--pl-crew-teal);  /* teal: showed up */
+  --pl-stage-dropped: #b4443a;               /* muted red: went cold */
+
+  --shadow-pl-sm: 0 1px 2px 0 rgb(10 10 10 / 0.06);
+  --shadow-pl-md: 0 8px 24px -10px rgb(10 10 10 / 0.12);
+  --shadow-pl-lg: 0 24px 60px -20px rgb(10 10 10 / 0.18);
+  --shadow-pl-glow: 0 18px 50px -18px rgb(10 10 10 / 0.20);
+
+  /* radius grid */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  /* the pill/circle shape, used everywhere a control or avatar goes fully round.
+     34 raw "999px" literals with no token at all (DSL, 2026-09-07). */
+  --radius-full: 999px;
+
+  /* type scale */
+  --text-display: clamp(2.75rem, 6vw, 4.5rem);
+  --text-h1: clamp(2rem, 4vw, 3rem);
+  --text-h2: clamp(1.5rem, 2.4vw, 2rem);
+  --text-h3: 1.25rem;
+  --text-body-lg: 1.125rem;
+  --text-body: 1rem;
+  --text-sm: 0.875rem;
+  --text-caption: 0.75rem;
+
+  --ease-pl: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* CONTROL SIZE LADDER — every interactive control is one of these four heights
+     and nothing in between. 8px steps, so controls always line up with each other
+     and with the spacing scale below. An icon-only control is a SQUARE at its own
+     rung (min-width == height), per the standing button rule.
+       xs 32  quiet inline toggles
+       sm 40  header / secondary buttons
+       md 48  primary buttons, form fields
+       lg 56  hero-scale CTA
+     Adding a fifth rung is a design-system decision, not a local override. */
+  --ctl-xs: 32px;
+  --ctl-sm: 40px;
+  --ctl-md: 48px;
+  --ctl-lg: 56px;
+
+  /* SPACING SCALE — 8px grid with a single 4px half-step for tight optical gaps.
+     Use these for gap/padding/margin instead of ad-hoc rem values. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* icon sizes, paired to the control ladder */
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+
+  /* layout */
+  --pad-x: clamp(1.25rem, 5vw, 3rem);
+  --maxw: 1120px;
+  --maxw-narrow: 760px;
+  /* third rung of the container ladder: a feature block that carries a large
+     photograph beside a text column needs more width than a reading section.
+     Used only by .grad-wrap today (>=1180px). */
+  --maxw-wide: 1360px;
+  /* header bar: two rungs of the ladder plus its breathing room (40 + 12 + 12) */
+  --nav-h: 64px;
+  --nav-h-mobile: 56px;
+}
+
+/* ---- Reset / base -------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--pl-bg);
+  color: var(--pl-fg-body);
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-weight: 500;                 /* base is MEDIUM — no thin text */
+  font-size: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  color: var(--pl-fg);
+  font-weight: 700;                 /* headings BOLD */
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+p { margin: 0; }
+
+/* ---- Tooltip (design-system) --------------------------------------------
+   Dark bubble for ICON-ONLY controls (buttons/links with no visible text).
+   RULE: any control that shows only an icon MUST carry `data-tooltip="Label"`
+   (keep the label in sync with its aria-label). Appears on hover AND
+   keyboard focus. Default position = below, centered; add `data-tip-pos="top"`
+   to flip above (e.g. controls near the bottom of the viewport).             */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute; left: 50%; top: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  background: var(--pl-tooltip-bg); color: var(--pl-tooltip-fg);
+  font-size: var(--text-caption); font-weight: 600; line-height: 1;
+  white-space: nowrap; padding: 0.4rem 0.55rem; border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-pl-md);
+  opacity: 0; pointer-events: none; z-index: 100;
+  transition: opacity 0.12s var(--ease-pl), transform 0.12s var(--ease-pl);
+}
+[data-tooltip]::before {
+  content: ""; position: absolute; left: 50%; top: calc(100% + 3px);
+  transform: translateX(-50%);
+  border: 5px solid transparent; border-bottom-color: var(--pl-tooltip-bg);
+  opacity: 0; pointer-events: none; z-index: 100;
+  transition: opacity 0.12s var(--ease-pl);
+}
+[data-tooltip]:hover::after, [data-tooltip]:focus-visible::after {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+[data-tooltip]:hover::before, [data-tooltip]:focus-visible::before { opacity: 1; }
+/* GLOBAL RULE: never show a control's tooltip while its own popup/menu is open.
+   Every toggle keeps aria-expanded in sync, so this covers avatar/globe/hamburger
+   and any future toggle at the system level — never re-scope it per component. */
+[data-tooltip][aria-expanded="true"]::after,
+[data-tooltip][aria-expanded="true"]::before { content: none; }
+/* flip above */
+[data-tooltip][data-tip-pos="top"]::after {
+  top: auto; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(-4px);
+}
+[data-tooltip][data-tip-pos="top"]:hover::after,
+[data-tooltip][data-tip-pos="top"]:focus-visible::after { transform: translateX(-50%) translateY(0); }
+[data-tooltip][data-tip-pos="top"]::before {
+  top: auto; bottom: calc(100% + 3px);
+  border-bottom-color: transparent; border-top-color: var(--pl-tooltip-bg);
+}
+
+/* ---- Tooltip: light theme (design-system, extended 2026-09-06) ------------
+   White bubble for content tooltips (who/what a thing is), not icon labels.
+   Same floating-surface recipe as .nav__accmenu / .langswitch__menu. Allows
+   multiple lines: put a real newline (&#10;) in data-tooltip.               */
+[data-tooltip][data-tip-theme="light"]::after {
+  background: var(--pl-surface); color: var(--pl-fg);
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md);
+  font-size: var(--text-sm); font-weight: 600; line-height: 1.35;
+  white-space: pre-line; text-align: center; max-width: 16rem; width: max-content;
+  padding: var(--space-2) var(--space-3);
+}
+[data-tooltip][data-tip-theme="light"]::before {
+  border: 0; width: 10px; height: 10px; top: calc(100% + 4px);
+  background: var(--pl-surface);
+  border-left: 1px solid var(--pl-border); border-top: 1px solid var(--pl-border);
+  transform: translateX(-50%) rotate(45deg); z-index: 101;
+}
+[data-tooltip][data-tip-theme="light"][data-tip-pos="top"]::before {
+  top: auto; bottom: calc(100% + 4px);
+  border-left: 0; border-top: 0;
+  border-right: 1px solid var(--pl-border); border-bottom: 1px solid var(--pl-border);
+}
+/* Pinned state (touch): a tap toggles data-tip-open on the control; shows the
+   bubble with no hover/focus. Theme-agnostic. Never use aria-expanded for this. */
+[data-tooltip][data-tip-open]::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+[data-tooltip][data-tip-open]::before { opacity: 1; }
+
+/* Sticky footer: on short pages (legal / prep / login) keep the footer pinned to
+   the viewport bottom so the paper background never shows as dead space below it.
+   On the long home page this is a no-op (content already exceeds the viewport). */
+#app { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+#app > main { flex: 1 0 auto; }
+/* Compensates .nav's switch from sticky to fixed (below) — fixed removes it
+   from flex flow entirely, so without this every page's content would start
+   at y:0, underneath the now out-of-flow header. Matches --nav-h/-mobile
+   exactly (the same values .nav__in's own height already uses) so this is
+   invisible: content sits exactly where it always did. */
+#app { padding-top: var(--nav-h); }
+@media (max-width: 620px) { #app { padding-top: var(--nav-h-mobile); } }
+
+img { max-width: 100%; display: block; }
+
+/* Clickable things always signal it. */
+button, [role="button"], a[href], summary, label[for], select { cursor: pointer; }
+button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
+
+::selection { background: color-mix(in srgb, var(--pl-accent) 26%, transparent); }
+
+/* ---- Layout helpers ------------------------------------------------------ */
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad-x); }
+.narrow { max-width: var(--maxw-narrow); }
+
+.section { padding-block: clamp(3.5rem, 8vw, 6.5rem); }
+.section--alt { background: var(--pl-bg-alt); }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--pl-accent);
+  margin-bottom: var(--space-4);
+}
+/* separator: a small dot (echoes the hero-point bullets), not a long dash */
+.eyebrow::before {
+  content: ""; width: 6px; height: 6px; background: var(--pl-accent); border-radius: var(--radius-full);
+}
+
+.section-title { font-size: var(--text-h1); max-width: 20ch; }
+.section-lead {
+  margin-top: var(--space-4); font-size: var(--text-body-lg);
+  color: var(--pl-fg-body); max-width: 60ch; font-weight: 500;
+}
+.section-lead q { quotes: "\201C" "\201D"; font-weight: 600; color: var(--pl-fg); }
+
+/* ---- Buttons ------------------------------------------------------------- */
+/* SYSTEM RULE: a button is NEVER narrower than its height (min-width = height).
+   Icon-only buttons therefore render at least square, never a thin sliver. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: var(--ctl-md); min-width: var(--ctl-md); padding-inline: var(--space-5);
+  border-radius: var(--radius-md);
+  font-family: inherit; font-size: var(--text-body); font-weight: 600;
+  border: 1px solid transparent;
+  text-decoration: none; white-space: nowrap;
+  transition: transform 0.15s var(--ease-pl), background-color 0.2s var(--ease-pl),
+              border-color 0.2s var(--ease-pl), box-shadow 0.2s var(--ease-pl), opacity 0.2s var(--ease-pl);
+}
+/* HARD INVARIANT (Ofir, 2026-09-07): NO .btn ever shows an underline, on any
+   element or state. Restated per-pseudo-class, not just on the base selector,
+   so a future `a:hover{text-decoration:underline}` added elsewhere in this file
+   cannot win on source order against `.btn`'s own hover state (equal specificity
+   0,1,0). Do not remove; do not rely on `.btn` alone covering :link/:visited/
+   :hover/:active — a browser applies its own underline default to <a> regardless
+   of class, so every button-carrying element and every one of its states must
+   restate this explicitly, here, at the component's root, never per-instance. */
+.btn, .btn:link, .btn:visited, .btn:hover, .btn:active, .btn:focus { text-decoration: none; }
+.btn:active { transform: scale(0.975); }
+.btn svg { width: var(--icon-md); height: var(--icon-md); }
+
+.btn--primary { background: var(--pl-fg); color: var(--pl-bg); box-shadow: var(--shadow-pl-md); }
+.btn--primary:hover { opacity: 0.9; }
+
+.btn--sm { height: var(--ctl-sm); min-width: var(--ctl-sm); padding-inline: var(--space-4); font-size: var(--text-sm); }
+.btn--sm svg { width: var(--icon-sm); height: var(--icon-sm); }
+.btn--lg { height: var(--ctl-lg); min-width: var(--ctl-lg); padding-inline: var(--space-6); font-size: var(--text-body-lg); }
+
+/* Icon-only button: drop the side padding so min-width (== height) makes it a
+   perfect SQUARE. An icon-only control is never wider than it is tall. Use this
+   on ANY icon-only button (globe, avatar, ...) — one shared mechanism, no
+   per-control width hacks. */
+.btn--icon { padding-inline: 0; gap: 0; }
+
+/* ghost / secondary (Student entrance) — quieter than the WhatsApp CTA */
+.btn--ghost { background: transparent; color: var(--pl-fg); border-color: var(--pl-border-strong); }
+.btn--ghost:hover { background: var(--pl-bg-alt); border-color: var(--pl-fg); }
+.btn--ghost svg { color: var(--pl-fg-secondary); }
+
+/* Destructive action. Additive modifier, same pattern as .btn--icon stacking
+   with .btn--sm/--lg: stack it onto .btn--ghost for an icon-only destructive
+   control (roster row delete), or use it alone for a solid destructive CTA
+   (the delete-confirm dialog's "Delete" button). DSL-confirmed, 2026-09-03 -
+   reuses the existing --pl-stage-dropped red token, no new color. */
+.btn--danger { background: var(--pl-stage-dropped); color: var(--pl-accent-fg); box-shadow: var(--shadow-pl-md); }
+.btn--danger:hover { opacity: 0.9; }
+.btn--ghost.btn--danger { background: transparent; color: var(--pl-stage-dropped); border-color: var(--pl-stage-dropped); }
+.btn--ghost.btn--danger:hover { background: color-mix(in srgb, var(--pl-stage-dropped) 12%, transparent); border-color: var(--pl-stage-dropped); }
+.btn--ghost.btn--danger svg { color: var(--pl-stage-dropped); }
+
+.cta-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+/* invite chip */
+.chip {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: 0.4rem 0.85rem; border-radius: var(--radius-full);
+  background: var(--pl-surface); border: 1px solid var(--pl-border-strong);
+  box-shadow: var(--shadow-pl-sm);
+  font-size: var(--text-sm); font-weight: 600; color: var(--pl-fg);
+}
+.chip .dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--pl-accent); }
+
+/* ---- Navbar -------------------------------------------------------------- */
+/* FIXED, not sticky (2026-08-31) — real root cause of the recurring "no
+   header on first load" bug (3rd+ sighting, confirmed live inside WhatsApp's
+   in-app browser after every JS-timing patch: painting the header
+   immediately, forcing a reflow, retrying on a delay and on `pageshow`).
+   `position: sticky` requires the browser to establish scroll-anchored state
+   for the element; WebKit is documented to sometimes fail to do that when
+   the element enters the DOM after first paint, or when another native UI
+   surface (this page's own auto-triggered download sheet) interrupts the
+   render pipeline around the same moment. `position: fixed` has no such
+   state to establish — it is simply always pinned to the viewport, so there
+   is no initialization step left to race or fail. Since .nav sits at the
+   very top of every page with nothing above it, fixed and sticky look
+   IDENTICAL when they work; #app's own padding-top (above) exactly
+   compensates for taking .nav out of flow, so no page shifts. */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: color-mix(in srgb, var(--pl-bg) 82%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--pl-border);
+}
+.nav__in { display: flex; align-items: center; gap: var(--space-3); height: var(--nav-h); }
+.nav__brand { display: flex; align-items: center; gap: var(--space-2); text-decoration: none; margin-inline-end: auto; }
+.nav__brand img { height: var(--space-6); width: auto; }
+.nav__brand span { font-weight: 700; color: var(--pl-fg); font-size: var(--text-body); letter-spacing: -0.02em; }
+.nav__menu { display: flex; align-items: center; gap: var(--space-3); }
+/* hamburger — hidden on desktop, shown on mobile */
+.nav__burger {
+  display: none; width: var(--ctl-sm); height: var(--ctl-sm); flex: none;
+  border: 0; background: transparent; border-radius: var(--radius-md);
+  place-items: center; color: var(--pl-fg);
+  transition: background-color 0.2s var(--ease-pl);
+}
+.nav__burger:hover { background: var(--pl-bg-alt); }
+.nav__burger svg { width: var(--icon-lg); height: var(--icon-lg); }
+
+/* language toggle — quiet single text button (shows current language: ע / E) */
+.langtoggle {
+  border: 0; background: transparent; color: var(--pl-fg-secondary);
+  font-family: inherit; font-weight: 700; font-size: var(--text-body); line-height: 1;
+  min-width: var(--ctl-xs); height: var(--ctl-xs); padding-inline: var(--space-2); border-radius: var(--radius-md);
+  display: inline-grid; place-items: center;
+  transition: background-color 0.2s var(--ease-pl), color 0.2s var(--ease-pl);
+}
+.langtoggle:hover { background: var(--pl-bg-alt); color: var(--pl-fg); }
+/* full language name on desktop, 2-letter code on mobile */
+.langtoggle .lang-short { display: none; }
+
+/* language SWITCHER — DESKTOP: hide the quiet text toggle; show a secondary
+   globe button (same look as Student entrance) that opens a language dropdown. */
+.nav__menu > .langtoggle { display: none; }
+.langswitch { position: relative; display: inline-flex; }
+/* square icon button (width = the btn--sm height), never a thin sliver */
+/* square + no side padding now come from the shared .btn--icon modifier */
+.langswitch__btn svg { width: var(--icon-md); height: var(--icon-md); }
+.langswitch.is-open .langswitch__btn { background: var(--pl-bg-alt); border-color: var(--pl-border-strong); }
+/* RULE: don't show the button's tooltip while its dropdown is already open —
+   the options are right there, the hint is redundant. */
+.langswitch.is-open .langswitch__btn::after,
+.langswitch.is-open .langswitch__btn::before { content: none; }
+.langswitch__menu {
+  position: absolute; top: calc(100% + 8px); inset-inline-end: 0; min-width: 160px;
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-pl-md);
+  padding: 0.35rem; z-index: 60;
+}
+.langswitch__menu[hidden] { display: none; }
+.langswitch__item {
+  display: block; width: 100%; text-align: start; cursor: pointer;
+  padding: 0.6rem 0.75rem; border: 0; background: transparent; border-radius: var(--radius-sm);
+  color: var(--pl-fg); font-family: inherit; font-weight: 600; font-size: var(--text-body); line-height: 1;
+  transition: background-color 0.15s var(--ease-pl);
+}
+.langswitch__item:hover { background: var(--pl-bg-alt); }
+.langswitch__item[aria-current="true"] { color: var(--pl-accent); }
+.nav__book { }
+/* WhatsApp nav icon is intentionally NOT sized here — it inherits the persistent
+   20px from .btn--wa-solid svg. (Student entrance is text-only, no icon.) */
+
+/* ---- Student-area account avatar + dropdown (#/prep header variant) ------ */
+/* Replaces the WhatsApp button when signed in. Icon-only in the bar; the
+   Sign out label lives inside the dropdown. Aligns to the inline-end edge in
+   both LTR and RTL on desktop. */
+.nav__account { position: relative; flex: none; }
+/* Avatar reuses the .btn.btn--ghost.btn--sm base so it stays IDENTICAL to the
+   globe (square, radius-md, border-strong, 18px icon) and can't drift again. */
+.nav__account.is-open .nav__avatar { background: var(--pl-bg-alt); border-color: var(--pl-border-strong); }
+.nav__accmenu {
+  position: absolute; top: calc(100% + 8px); inset-inline-end: 0; min-width: 168px;
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-pl-md);
+  padding: 0.35rem; z-index: 60;
+}
+.nav__accmenu[hidden] { display: none; }
+.nav__accmenu-item {
+  display: block; width: 100%; text-align: start; cursor: pointer;
+  padding: 0.6rem 0.75rem; border: 0; background: transparent; border-radius: var(--radius-sm);
+  color: var(--pl-fg); font-family: inherit; font-weight: 600; font-size: var(--text-body); line-height: 1;
+  transition: background-color 0.15s var(--ease-pl);
+}
+.nav__accmenu-item:hover { background: var(--pl-bg-alt); }
+
+/* ---- Hero ---------------------------------------------------------------- */
+.hero { position: relative; overflow: hidden; padding-top: clamp(2.5rem, 6vw, 4.5rem); }
+
+.hero__title {
+  font-size: var(--text-display); letter-spacing: -0.03em; line-height: 1.04;
+  max-width: 16ch;
+}
+.hero__title .mark { color: var(--pl-accent); }
+.hero__sub {
+  margin-top: 1.4rem; font-size: var(--text-body-lg); color: var(--pl-fg-body);
+  max-width: 48ch; font-weight: 500;
+}
+.hero__cta { margin-top: var(--space-6); }
+.hero__meta { margin-top: var(--space-5); display: flex; flex-wrap: wrap; gap: 0.6rem 1.25rem; align-items: center; }
+
+/* ---- Generic content grids ---------------------------------------------- */
+.grid { display: grid; gap: 1.25rem; }
+.grid--3 { grid-template-columns: 1fr; }
+.grid--2 { grid-template-columns: 1fr; }
+@media (min-width: 760px) {
+  .grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .grid--2 { grid-template-columns: repeat(2, 1fr); }
+}
+
+.card {
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); padding: 1.6rem;
+  box-shadow: var(--shadow-pl-sm);
+  transition: border-color 0.2s var(--ease-pl), box-shadow 0.2s var(--ease-pl), transform 0.2s var(--ease-pl);
+}
+.card:hover { border-color: var(--pl-border-strong); box-shadow: var(--shadow-pl-md); }
+.card__ico {
+  width: var(--ctl-sm); height: var(--ctl-sm); border-radius: var(--radius-md);
+  display: grid; place-items: center; margin-bottom: var(--space-4);
+  background: color-mix(in srgb, var(--pl-accent) 12%, transparent);
+  color: var(--pl-accent);
+}
+.card__ico svg { width: 22px; height: 22px; }
+.card h3 { font-size: var(--text-h3); margin-bottom: var(--space-2); }
+.card p { color: var(--pl-fg-body); font-weight: 500; }
+
+/* deliverables (walk away) — numbered */
+.deliv { display: grid; gap: var(--space-4); grid-template-columns: 1fr; margin-top: var(--space-7); }
+@media (min-width: 760px) { .deliv { grid-template-columns: repeat(2, 1fr); } }
+.deliv__item {
+  display: flex; gap: var(--space-4); align-items: flex-start;
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); padding: 1.4rem 1.5rem; box-shadow: var(--shadow-pl-sm);
+}
+.deliv__num {
+  flex: none; width: var(--ctl-sm); height: var(--ctl-sm); border-radius: var(--radius-md);
+  display: grid; place-items: center; font-weight: 700; color: var(--pl-accent-fg);
+  background: var(--pl-accent);
+}
+.deliv__item h3 { font-size: var(--text-h3); margin-bottom: 0.3rem; }
+.deliv__item p { color: var(--pl-fg-body); font-size: var(--text-sm); font-weight: 500; }
+
+/* Fleet result "benefits" cards (Ofir, 2026-09-08): match the homepage WHY
+   tiles' number badge exactly - light accent-tint square, accent-colored
+   text, sitting above the title instead of beside it. Same recipe as
+   .whytile__num, just scoped to .fleet-benefits so the rest of the site's
+   .deliv/.deliv__num (currently only used here anyway) is untouched if
+   reused elsewhere later. */
+.fleet-benefits .deliv__item { flex-direction: column; align-items: flex-start; }
+.fleet-benefits .deliv__num {
+  width: var(--ctl-sm); height: var(--ctl-sm); border-radius: var(--radius-md);
+  margin-bottom: var(--space-4); direction: ltr;
+  background: color-mix(in srgb, var(--pl-accent) 12%, transparent);
+  color: var(--pl-accent);
+  font-size: 1.25rem; font-weight: 700; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* agenda — 3 phases */
+.agenda { display: grid; gap: 1.1rem; }
+.phase {
+  display: grid; grid-template-columns: auto 1fr; gap: 1.25rem; align-items: start;
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); padding: 1.6rem 1.75rem; box-shadow: var(--shadow-pl-sm);
+}
+.phase__time {
+  flex: none; font-weight: 700; color: var(--pl-fg); font-size: var(--text-body);
+  background: color-mix(in srgb, var(--pl-accent) 12%, transparent);
+  color: var(--pl-accent); border-radius: var(--radius-full); padding: 0.35rem 0.9rem; white-space: nowrap;
+  align-self: start;
+}
+.phase h3 { font-size: var(--text-h3); margin-bottom: 0.35rem; }
+.phase p { color: var(--pl-fg-body); font-weight: 500; }
+
+/* agenda — expandable phase (collapsible at the phase level, open by default) */
+.aphase {
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-pl-sm); overflow: hidden;
+}
+.aphase[open] { border-color: var(--pl-border-strong); }
+.aphase__head {
+  list-style: none; cursor: pointer;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 1.25rem; align-items: start;
+  padding: 1.6rem 1.75rem;
+}
+.aphase__head::-webkit-details-marker { display: none; }
+.aphase h3 { font-size: var(--text-h3); margin-bottom: 0.35rem; }
+.aphase__intro p { color: var(--pl-fg-body); font-weight: 500; }
+.aphase__toggle {
+  display: inline-flex; align-items: center; gap: 0.4rem; align-self: center;
+  font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.01em;
+  color: var(--pl-fg-secondary); white-space: nowrap;
+}
+.aphase__toggle .chevron { flex: none; transition: transform 0.2s var(--ease-pl); }
+.aphase[open] .aphase__toggle .chevron { transform: rotate(180deg); }
+/* DESKTOP only: time badge sits at the top-end corner, "What's inside" beneath it,
+   so the title + description take the full width (the badge no longer shoves the
+   title). Mobile keeps its own stacked layout (see the max-width:620 block). */
+@media (min-width: 621px) {
+  .aphase__head {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "title time" "desc toggle";
+    column-gap: 1.25rem; row-gap: var(--space-2);
+  }
+  /* let the h3 + p become direct grid items so each aligns with its opposite */
+  .aphase__head .aphase__intro { display: contents; }
+  .aphase__head .aphase__intro h3 { grid-area: title; align-self: center; margin-bottom: 0; }
+  .aphase__head .aphase__intro p  { grid-area: desc;  align-self: start; }
+  /* row 1: badge centered on the title's line */
+  .aphase__head .phase__time { grid-area: time; justify-self: end; align-self: center; }
+  /* row 2: toggle top-aligned with the description (which may wrap) */
+  .aphase__head .aphase__toggle { grid-area: toggle; justify-self: end; align-self: start; }
+}
+.aphase__items { display: grid; gap: 0.6rem; padding: 0 1.75rem 1.6rem; }
+.aphase__item {
+  background: color-mix(in srgb, var(--pl-accent) 5%, var(--pl-surface));
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md);
+  padding: 0.8rem 1.05rem;
+}
+.aphase__item h4 { font-size: var(--text-body); font-weight: 700; color: var(--pl-fg); line-height: 1.3; margin-bottom: var(--space-1); }
+.aphase__item p { font-size: var(--text-body); color: var(--pl-fg-body); font-weight: 500; }
+
+/* proof of craft */
+.proof { display: grid; gap: var(--space-5); grid-template-columns: 1fr; }
+@media (min-width: 900px) { .proof { grid-template-columns: 1fr 1fr; } }
+.proof__block {
+  border-radius: var(--radius-xl); border: 1px solid var(--pl-border);
+  background: var(--pl-surface); box-shadow: var(--shadow-pl-md); overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.proof__body { padding: 1.75rem; flex: 1; }   /* flex:1 -> both cards' text areas equalize */
+.proof__block h3 { font-size: var(--text-h2); margin-bottom: 0.6rem; }
+.proof__block p { color: var(--pl-fg-body); font-weight: 500; }
+/* equal-height media band on top of both proof cards (screenshots) */
+.proof__shot { height: 15rem; background: var(--pl-illo-bg); border-bottom: 1px solid var(--pl-border); overflow: hidden; }
+.proof__shot img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+
+/* who-it's-for tiles — puppet illustration on top, text below, equal height */
+.tilecard { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius-lg);
+  border: 1px solid var(--pl-border); background: var(--pl-surface); box-shadow: var(--shadow-pl-sm);
+  transition: border-color 0.2s var(--ease-pl), box-shadow 0.2s var(--ease-pl); }
+.tilecard:hover { border-color: var(--pl-border-strong); box-shadow: var(--shadow-pl-md); }
+.tilecard__illo { height: 13.5rem; overflow: hidden; background: var(--pl-illo-bg); }
+.tilecard__illo img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.tilecard__body { padding: 1.6rem; flex: 1; }
+.tilecard__body h3 { font-size: var(--text-h3); margin-bottom: var(--space-2); }
+.tilecard__body p { color: var(--pl-fg-body); font-weight: 500; }
+
+.linkline {
+  display: inline-flex; align-items: center; gap: 0.4rem; margin-top: var(--space-4);
+  color: var(--pl-fg); font-weight: 700; text-decoration: none; font-size: var(--text-sm);
+}
+.linkline:hover { color: var(--pl-accent); }
+.linkline svg { width: 16px; height: 16px; }
+
+/* DIRECTIONAL ICONS MUST FOLLOW THE READING DIRECTION (Ofir, 2026-08-24).
+   `I.arrow` and `I.login` both point "forward" — in LTR that is right, in RTL
+   it is LEFT. Left un-mirrored, the Hebrew "לצפייה ב-Glimps" arrow pointed away
+   from its own label. MIRRORED, not duplicated: one arrow stays in the icon set
+   so the two directions can never drift apart. Only these two are directional —
+   .chevron is vertical, .pcrumb__arrow sits inside a forced dir="ltr" step
+   crumb, and neither may be swept into this rule. */
+[dir="rtl"] .linkline svg,
+[dir="rtl"] .login__ico svg { transform: scaleX(-1); }
+
+/* FAQ */
+.faq { display: grid; gap: var(--space-3); }
+.faq details {
+  background: var(--pl-surface); border: 1px solid var(--pl-border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pl-sm); overflow: hidden;
+}
+.faq details[open] { border-color: var(--pl-border-strong); }
+.faq summary {
+  list-style: none; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+  padding: 1.15rem 1.4rem; font-weight: 700; color: var(--pl-fg); font-size: var(--text-body-lg);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary .chevron { flex: none; transition: transform 0.2s var(--ease-pl); color: var(--pl-fg-secondary); }
+.faq details[open] summary .chevron { transform: rotate(180deg); }
+.faq__a { padding: 0 1.4rem 1.25rem; color: var(--pl-fg-body); font-weight: 500; }
+
+/* CTA band — the one place the system inverts to an ink surface. DSL, 2026-09-07:
+   was 8 raw white/opacity literals with no token anywhere; named as a local
+   on-ink scope instead of 8 separate global tokens (this inversion has exactly
+   one caller). Same values, now documented — any future inverted surface reuses
+   these four instead of re-deriving white/opacity by hand. */
+.ctaband {
+  --on-ink-fg: #ffffff;
+  --on-ink-fg-muted: rgb(255 255 255 / 0.78);
+  --on-ink-chip-bg: rgb(255 255 255 / 0.10);
+  --on-ink-chip-border: rgb(255 255 255 / 0.24);
+  background: var(--pl-fg); color: var(--pl-bg); border-radius: var(--radius-2xl);
+  padding: clamp(2rem, 5vw, 3.25rem); text-align: center;
+  box-shadow: var(--shadow-pl-lg); position: relative; overflow: hidden; }
+.ctaband h2 { color: var(--on-ink-fg); font-size: var(--text-h1); max-width: 22ch; margin-inline: auto; }
+.ctaband p { color: var(--on-ink-fg-muted); margin-top: 0.85rem; font-weight: 500; max-width: 52ch; margin-inline: auto; }
+.ctaband .cta-row { justify-content: center; margin-top: 1.75rem; }
+.ctaband .btn--primary { background: var(--on-ink-fg); color: var(--pl-fg); }
+.ctaband .chip { background: var(--on-ink-chip-bg); border-color: var(--on-ink-chip-border); color: var(--on-ink-fg); }
+
+
+/* footer */
+.footer { border-top: 1px solid var(--pl-border); padding-block: 2.5rem; margin-top: var(--space-4); }
+.footer__in { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; justify-content: space-between; }
+.footer__brand { display: flex; align-items: center; gap: 0.6rem; }
+.footer__brand img { height: 26px; }
+.footer__brand span { font-weight: 700; color: var(--pl-accent); }
+.footer__meta { color: var(--pl-fg-secondary); font-size: var(--text-sm); font-weight: 500; }
+.footer a { color: var(--pl-fg); font-weight: 600; text-decoration: none; }
+.footer a:hover { color: var(--pl-accent); }
+
+/* ---- Form controls + Student login (placeholder, non-functional) ---------
+   Base .input/.field are the system's first form-control component. Tokens only,
+   appearance stripped (native-chrome-free), strong-contrast border, accent focus
+   ring. The .login card is a placeholder student sign-in: submit is wired to a
+   gentle "coming soon" note (data-student-form / data-student-note in app.js),
+   no auth, no validation. Real logic lands later. */
+.field { display: grid; gap: 0.4rem; text-align: start; }
+.field__label { font-size: var(--text-sm); font-weight: 700; color: var(--pl-fg); line-height: 1.3; }
+
+.input {
+  width: 100%; height: 3rem; padding-inline: 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--pl-border-strong);
+  background: var(--pl-surface); color: var(--pl-fg);
+  font-family: inherit; font-size: var(--text-body); font-weight: 500; line-height: 1.4;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.2s var(--ease-pl), box-shadow 0.2s var(--ease-pl);
+}
+.input::placeholder { color: var(--pl-fg-muted); font-weight: 500; opacity: 1; }
+.input:hover { border-color: var(--pl-fg-secondary); }
+.input:focus {
+  outline: none; border-color: var(--pl-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-accent) 22%, transparent);
+}
+
+.login {
+  max-width: 440px; margin-inline: auto; text-align: center;
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-xl); padding: clamp(1.75rem, 4vw, 2.5rem);
+  box-shadow: var(--shadow-pl-md);
+}
+.login__ico {
+  width: 48px; height: 48px; border-radius: var(--radius-md); margin: 0 auto 1.1rem;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--pl-accent) 12%, transparent);
+  color: var(--pl-accent);
+}
+.login__ico svg { width: 24px; height: 24px; }
+.login .eyebrow { justify-content: center; }
+.login__title { font-size: var(--text-h2); letter-spacing: -0.02em; }
+/* Entry screen only (2026-09-07, Ofir): --text-h2 scales with viewport width
+   (2.4vw), but this card is capped at 440px - on a WIDE window the vw term
+   pushed the font past what the fixed-width card could hold on one line,
+   wrapping to two; on a narrower window the smaller vw font fit on one line.
+   More real estate produced a worse result. A flat size decouples it from
+   viewport width - verified 1-line up to ~360px of content width (the card's
+   steady-state desktop width); only wraps where the card itself is narrower
+   than that (real mobile, already fine there). Scoped to .fleet-card--entry
+   so every OTHER screen sharing .login__title (questions, loading, done,
+   the site's login/registration modals) is untouched. */
+.fleet-card--entry .login__title { font-size: 1.5625rem; }
+.login__sub { margin-top: 0.6rem; color: var(--pl-fg-body); font-weight: 500; font-size: var(--text-body); }
+.login__form { display: grid; gap: var(--space-4); margin-top: 1.75rem; text-align: start; }
+.login__submit { width: 100%; margin-top: var(--space-1); }
+.login__note {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  margin-top: var(--space-1); padding: 0.75rem 0.95rem; border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--pl-accent) 10%, transparent);
+  color: var(--pl-accent); font-weight: 600; font-size: var(--text-sm);
+}
+.login__note[hidden] { display: none; }
+.login__note svg { width: 18px; height: 18px; flex: none; }
+
+/* Continue-with-Google button: neutral surface so the multicolor logo reads
+   (Google brand guidance). Token-based, no hardcoded values. */
+.login__google {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+  background: var(--pl-surface); color: var(--pl-fg);
+  border: 1px solid var(--pl-border-strong); box-shadow: var(--shadow-pl-sm);
+}
+.login__google:hover { background: var(--pl-bg-alt); border-color: var(--pl-fg); }
+.login__google svg { flex: none; }
+/* Non-error hint under the button (webview "open in Safari" nudge). */
+.login__note--hint {
+  background: color-mix(in srgb, var(--pl-fg) 5%, transparent);
+  color: var(--pl-fg-secondary); font-weight: 500;
+}
+
+/* ---- .moment-card — shared base for a centered "moment" card: illustration/
+   icon, headline, body, actions. Extracted 2026-08-31 (Design System Lead)
+   after a THIRD near-duplicate of this recipe showed up on `#/kit`'s first
+   direction (a boxed card) — .login stays separate (it's a form container
+   with different composition), .noacct builds on this. `#/kit` itself later
+   moved to a full-bleed direction with no card (see .moment-page/.kitfull
+   below) and dropped off this base, but the extraction is still correct:
+   .noacct alone was still a near-duplicate of .login's card recipe, drifted
+   off the 8px grid at 28-40px padding vs. this class's grid-aligned
+   32-48px — reuse it again the next time a third boxed-card need shows up. */
+.moment-card {
+  max-width: 34rem; margin-inline: auto; text-align: center;
+  padding: clamp(2rem, 5vw, 3rem);
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-xl); box-shadow: var(--shadow-pl-md);
+}
+
+/* ---- "No access yet" notice — shown to a signed-in non-student (visitor).
+   Purple-tinted callout (accent recipe, brand-consistent) with a WhatsApp CTA.
+   Builds on .moment-card (base); this is only the accent-tint override. */
+.noacct {
+  margin: clamp(1rem, 6vw, 3rem) auto;
+  background: color-mix(in srgb, var(--pl-accent) 6%, var(--pl-surface));
+  border-color: color-mix(in srgb, var(--pl-accent) 26%, transparent);
+}
+.noacct__ico {
+  width: 48px; height: 48px; margin: 0 auto 1rem; border-radius: var(--radius-lg);
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--pl-accent) 12%, transparent); color: var(--pl-accent);
+}
+.noacct__ico svg { width: 26px; height: 26px; }
+/* Destructive-tint override, same recipe as .noacct itself over .moment-card:
+   only the color-mix tint changes. Used by the delete-confirm dialog. */
+.noacct__ico--danger {
+  background: color-mix(in srgb, var(--pl-stage-dropped) 12%, transparent);
+  color: var(--pl-stage-dropped);
+}
+.noacct__title { font-size: var(--text-h2); font-weight: 700; color: var(--pl-fg); margin-bottom: 0.6rem; }
+.noacct__body { color: var(--pl-fg-body); font-weight: 500; font-size: var(--text-body-lg); line-height: 1.6; }
+.noacct .cta-row { justify-content: center; }
+
+/* ---- #/kit — ONE VIEWPORT, NO SCROLL (Ofir, 2026-08-31): this is
+   a single moment, not a scrolling page. .page's own generous min-height and
+   .section's own generous padding-block (both tuned for long marketing
+   pages) are overridden here specifically, not changed at their source —
+   every other page still scrolls exactly as before.
+
+   ROOT CAUSE of the white/gray band Ofir saw below the button on a real
+   phone: this used to set its OWN `min-height: calc(100dvh - nav-h)` — a
+   SECOND, independent read of the dynamic-viewport unit, on top of #app's
+   own `min-height: 100dvh` (above). Two separate dvh reads can disagree on
+   a real device while the browser's address bar is still show/hide-
+   transitioning (a real-device timing quirk headless Chromium cannot
+   reproduce at all, which is why this passed every local check here) -
+   whichever one resolved smaller left a gap of the page's base background
+   showing through beneath the flex column. Fixed by having exactly ONE
+   height authority: #app already sizes itself once, and `#app > main {
+   flex: 1 0 auto }` (above) already grows any <main> - this one included -
+   to fill whatever's left. Nothing here needs its own height math. */
+/* ---- .moment-page — ONE VIEWPORT, NO SCROLL pattern (DSL promotion, 2026-09-06)
+   Shared by #/kit and #/fleet's single-card steps. #app is the one height
+   authority, <main> grows to fill, the section centers its card in what is
+   left. Section padding is a card rhythm, never the marketing rhythm.
+   (max-height: 780px) is the system's one short-viewport breakpoint.      */
+.moment-page { display: flex; flex-direction: column; }
+.moment-page > .section {
+  flex: 1 0 auto; display: flex; flex-direction: column; justify-content: center;
+  padding-block: clamp(1.25rem, 3vw, 2.5rem);
+}
+@media (max-height: 780px) {
+  .moment-page > .section { padding-block: var(--space-4); }
+  .moment-page .moment-card { padding-block: clamp(1.5rem, 3vh, 2rem); }
+}
+
+/* ---- The final #/kit direction Ofir picked: character + text + button sit
+   directly on the page's own cream background (var(--pl-brand-cream) — same
+   one the loader curtain uses), no card, no boundary, edge to edge.
+   The illustration itself (kit-hero-dean.webp/.png) now carries a real alpha
+   channel — no fill color of its own at all (Marketing Designer's matte
+   pass, 2026-08-31) — so there is nothing left to color-match; it sits on
+   whatever this page's background is. */
+.kitfull {
+  background: var(--pl-brand-cream);
+  padding-block: clamp(0.75rem, 3vw, 1.5rem);
+  text-align: center;
+  justify-content: center;
+}
+.kitfull__illo { display: block; width: 100%; max-width: clamp(160px, 38vw, 340px); margin: 0 auto; }
+/* The source (1024x1536) has the character in the upper portion and a
+   transparent tail below (built for a background treatment). Transparent
+   pixels are invisible but still occupy layout height — a 4:5 crop still
+   left ~100px of dead air below the feet (Ofir: "the character is like a
+   hundred pixels above the headline... make it more proximate"). Measured
+   the actual alpha channel instead of eyeballing another guess: content
+   (Dean + the gift) ends at row 879 of 1536. Cropping to 910 (a small ~30px
+   margin below the feet, not zero) is exact, not approximate. */
+.kitfull__illo img { display: block; width: 100%; height: auto; aspect-ratio: 1024 / 910; object-fit: cover; object-position: center top; }
+.kitfull__body { margin-top: clamp(0.25rem, 1.5vw, 0.75rem); }
+[dir] .kitfull .eyebrow { justify-content: center; }
+[dir] .kitfull .section-title { text-align: center; max-width: none; margin-top: var(--space-2); }
+[dir] .kitfull .login__sub { text-align: center; margin-top: var(--space-2); }
+.kitfull__cta { justify-content: center; margin-top: 1.25rem; }
+
+/* ---- Register-your-interest FORM (inside the shared .modal__card) ----------
+   Reuses .field/.input + the login card's centered header. The wider card fits
+   four fields comfortably; fields are reading-start aligned (RTL-correct via the
+   .field's text-align: start). Submit shows a spinner while the lead is written. */
+.modal__card--form { max-width: 30rem; }
+.reg__form { display: grid; gap: var(--space-4); margin-top: 1.6rem; text-align: start; }
+.reg__note {
+  width: 100%; min-height: 4.75rem; resize: vertical;
+  padding: 0.7rem 0.95rem; border: 1px solid var(--pl-border-strong);
+  border-radius: var(--radius-md); background: var(--pl-surface);
+  color: var(--pl-fg); font-family: inherit; font-size: var(--text-body); font-weight: 500; line-height: 1.5;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.2s var(--ease-pl), box-shadow 0.2s var(--ease-pl);
+}
+.reg__note::placeholder { color: var(--pl-fg-muted); font-weight: 500; opacity: 1; }
+.reg__note:hover { border-color: var(--pl-fg-secondary); }
+.reg__note:focus {
+  outline: none; border-color: var(--pl-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-accent) 22%, transparent);
+}
+/* Inline error / try-again note — danger-tinted, matches the .field rhythm. */
+.reg__error {
+  display: flex; align-items: center; gap: var(--space-2);
+  margin: 0; padding: 0.7rem 0.9rem; border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--pl-stage-dropped) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pl-stage-dropped) 30%, transparent);
+  color: var(--pl-stage-dropped); font-weight: 600; font-size: var(--text-sm); line-height: 1.4; text-align: start;
+}
+.reg__error[hidden] { display: none; }
+.reg__error svg { width: 18px; height: 18px; flex: none; }
+/* Submit: spinner replaces the label while in flight; button stays disabled. */
+.reg__submit { margin-top: var(--space-1); }
+.reg__submit:disabled { cursor: default; opacity: 0.85; }
+.reg__submit-spinner {
+  display: none; width: 18px; height: 18px; flex: none; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--pl-bg) 40%, transparent);
+  border-top-color: var(--pl-bg); animation: regspin 0.7s linear infinite;
+}
+.reg__submit.is-loading .reg__submit-spinner { display: inline-block; }
+.reg__submit.is-loading .reg__submit-label { display: none; }
+@keyframes regspin { to { transform: rotate(360deg); } }
+/* Success view — green check, centered, mirrors the notice layout. */
+.reg__success-ico {
+  background: color-mix(in srgb, var(--pl-stage-confirmed) 14%, transparent);
+  color: var(--pl-stage-confirmed);
+}
+.reg__success-body { color: var(--pl-fg-body); font-weight: 500; font-size: var(--text-body-lg); line-height: 1.6; }
+
+/* ---- Student-area tab bar (Course content / Students / …) — DS tokens only.
+   Aligns to the reading-start edge via flex-start (honors dir: right in RTL,
+   left in LTR). Active tab uses the accent underline. -------------------------- */
+.tabs { display: flex; gap: var(--space-1); border-bottom: 1px solid var(--pl-border); }
+.tabs__btn {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  font-family: inherit; font-weight: 700; font-size: var(--text-body);
+  color: var(--pl-fg-secondary); padding: 0.75rem 1.1rem;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.2s var(--ease-pl), border-color 0.2s var(--ease-pl);
+}
+.tabs__btn:hover { color: var(--pl-fg); }
+.tabs__btn[aria-selected="true"] { color: var(--pl-accent); border-bottom-color: var(--pl-accent); }
+.tabpanel[hidden] { display: none; }
+
+/* ---- Admin roster (Registered students) - admin-only, DS tokens only ------ */
+.roster__loading, .roster__empty {
+  color: var(--pl-fg-secondary); font-size: var(--text-sm); font-weight: 500;
+  padding: 1.25rem; border: 1px dashed var(--pl-border-strong);
+  border-radius: var(--radius-lg); background: var(--pl-surface); text-align: start;
+}
+/* NOTHING IN THIS PANEL EVER SCROLLS SIDEWAYS (Ofir 2026-08-23: "look at the
+   fact that it's in horizontal scroll. This is ridiculous"). Two rules make that
+   a guarantee instead of a hope: the table is FIXED layout with a declared
+   colgroup, so no cell can widen it, and every cell wraps, so long text has
+   nowhere to go but down. Below 1024 the table becomes cards (see the media
+   query at the end of this block) and the question does not arise. */
+.roster__scroll {
+  /* CLIP, NOT HIDDEN, AND THE OTHER AXIS SAID OUT LOUD. `overflow-x: hidden`
+     with `overflow-y` left at its initial `visible` makes the browser compute
+     that `visible` to `auto` (CSS Overflow: when one axis is not visible and the
+     other is, the visible one becomes auto) - which turned this box into its own
+     vertical SCROLL REGION. Ofir got a second scrollbar down the side of his CRM
+     and had to scroll inside a box to read it. `clip` carries no such rule, so
+     the horizontal guarantee holds and the table renders at its full natural
+     height. The PAGE is the only thing that scrolls; a long page is the right
+     answer until there are enough rows to justify pagination.
+     `display: flow-root` replaces the one thing the old scroll container was
+     silently doing for free: establishing a block formatting context, so the
+     last row's bottom margin cannot collapse out through the container's border. */
+  display: flow-root; overflow-x: clip; overflow-y: visible;
+  border: 1px solid var(--pl-border); border-radius: var(--radius-lg);
+  background: var(--pl-surface); box-shadow: var(--shadow-pl-sm);
+}
+.roster__table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.roster__table--fixed { table-layout: fixed; }
+.roster__table th, .roster__table td {
+  padding: var(--space-3); text-align: start; vertical-align: top;
+  border-bottom: 1px solid var(--pl-border);
+  white-space: normal; overflow-wrap: anywhere;
+}
+.roster__table th {
+  vertical-align: middle; white-space: nowrap;
+  font-weight: 600; color: var(--pl-fg-secondary);
+  text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.72rem;
+}
+/* Info icon inline in a column header (Access), explaining what its button
+   does via the existing [data-tooltip] component - no new tooltip mechanism. */
+.roster__colhelp {
+  display: inline-flex; vertical-align: middle; margin-inline-start: 0.3rem;
+  border: 0; background: transparent; padding: 0; color: var(--pl-fg-muted);
+  cursor: help; text-transform: none; letter-spacing: normal;
+}
+.roster__colhelp:hover, .roster__colhelp:focus-visible { color: var(--pl-fg-secondary); }
+.roster__colhelp svg { width: 13px; height: 13px; }
+/* Column budget. Person and Access each carry two lines instead of taking two
+   columns apiece, which is what leaves `צעד הבא` the remaining width - it is the
+   one field that has to be readable without opening the row. */
+.roster__table--fixed .rc-chev    { width: 52px; }
+.roster__table--fixed .rc-person  { width: 20%; }
+.roster__table--fixed .rc-access  { width: 12%; }
+.roster__table--fixed .rc-stage   { width: 12%; }
+.roster__table--fixed .rc-source  { width: 12%; }
+/* 200px is measured, not guessed: the widest pair is "Unconfirm" + the remove
+   square (136 + 8 + 40 = 184) plus the cell's own 2x12px padding. */
+.roster__table--fixed .rc-actions { width: 200px; }
+/* .rc-next takes the remainder on purpose - no width declared. */
+
+/* The CRM is a data table, not a reading column: third rung of the container
+   ladder once there is room for it. */
+@media (min-width: 1180px) { .roster-wrap { max-width: var(--maxw-wide); } }
+.roster__table tbody tr:last-child td { border-bottom: none; }
+.roster__table td[data-label="Email"], .roster__table td[data-label="אימייל"] {
+  color: var(--pl-fg-body); font-variant-numeric: tabular-nums;
+}
+.roster__badge {
+  display: inline-block; padding: 0.2rem 0.6rem; border-radius: var(--radius-full);
+  font-weight: 600; font-size: 0.72rem;
+  background: color-mix(in srgb, var(--pl-fg) 8%, transparent); color: var(--pl-fg-secondary);
+}
+/* The cell stays a real table cell (display:flex on a <td> takes it out of the
+   table's box model); the buttons live in a wrapper inside it. */
+.roster__actions { text-align: end; }
+.roster__actionwrap { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; }
+.roster__remove { color: var(--pl-fg-secondary); padding-inline: 0; }
+.roster__remove svg { width: 16px; height: 16px; }
+
+/* Add-user form (admin CRM). DS tokens only; dir-aware via logical properties. */
+/* Capped so the two short inputs do not stretch across the wide container the
+   table now uses - a name field is not a 600px field. */
+.roster__add { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; max-width: 52rem; }
+.roster__input {
+  flex: 1 1 16rem; min-width: 12rem; height: var(--ctl-md);
+  padding: 0 0.9rem; border: 1px solid var(--pl-border-strong);
+  border-radius: var(--radius-md); background: var(--pl-surface);
+  color: var(--pl-fg); font-family: inherit; font-size: var(--text-body);
+  box-shadow: var(--shadow-pl-sm);
+  transition: border-color 0.2s var(--ease-pl), box-shadow 0.2s var(--ease-pl);
+}
+.roster__input::placeholder { color: var(--pl-fg-muted); }
+.roster__input:focus {
+  outline: none; border-color: var(--pl-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-accent) 18%, transparent);
+}
+.roster__addbtn { flex: none; gap: var(--space-2); }
+.roster__addbtn svg { width: 18px; height: 18px; }
+.roster__hint {
+  margin-top: 0.6rem; color: var(--pl-fg-secondary);
+  font-size: var(--text-sm); font-weight: 500;
+}
+
+/* Status pills: confirmed (accent) · pending (neutral, base .roster__badge) ·
+   uninvited gate-crasher (orange warn). Signed-in indicators. */
+.roster__badge--ok {
+  background: color-mix(in srgb, var(--pl-accent) 14%, transparent); color: var(--pl-accent);
+}
+.roster__badge--warn {
+  background: color-mix(in srgb, var(--pl-crew-orange) 16%, transparent); color: var(--pl-crew-orange);
+}
+.roster__access { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.roster__yes {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-1);
+  color: var(--pl-fg-body); font-weight: 600; font-size: var(--text-caption);
+}
+.roster__yes svg { width: var(--icon-sm); height: var(--icon-sm); color: var(--pl-accent); flex: none; align-self: center; }
+.roster__whenrel { font-weight: 600; color: var(--pl-fg-body); }
+.roster__whenabs { color: var(--pl-fg-muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+.roster__no { color: var(--pl-fg-muted); font-size: var(--text-caption); font-weight: 500; }
+/* A value that genuinely has nothing in it recedes instead of shouting "-". */
+.roster__none { color: var(--pl-fg-muted); }
+
+/* ---- CRM mini-card extensions to the roster table ------------------------ */
+/* Expand chevron (opens the per-row edit detail). */
+.roster__expandcell { width: 1%; padding-inline: var(--space-2); }
+.roster__expand {
+  display: grid; place-items: center; width: 1.9rem; height: var(--ctl-xs);
+  padding: 0; border: 1px solid var(--pl-border); border-radius: var(--radius-md);
+  background: var(--pl-surface); color: var(--pl-fg-secondary); cursor: pointer;
+  transition: color 0.2s var(--ease-pl), border-color 0.2s var(--ease-pl), background 0.2s var(--ease-pl);
+}
+.roster__expand:hover { color: var(--pl-fg); border-color: var(--pl-border-strong); }
+.roster__expand svg { width: 16px; height: 16px; transition: transform 0.2s var(--ease-pl); }
+.roster__expand.is-open svg { transform: rotate(180deg); }
+.roster__expand.is-open { color: var(--pl-accent); border-color: var(--pl-accent); }
+
+/* Person = name over email. One cell, two lines - and the email is muted, so a
+   row with no email reads as a lead rather than as a missing field. */
+.roster__person { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.roster__pname { font-weight: 600; color: var(--pl-fg); }
+.roster__pmail {
+  font-size: var(--text-caption); color: var(--pl-fg-secondary);
+  font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+}
+.roster__free { color: var(--pl-fg-body); }
+
+/* `צעד הבא`, read at a glance: the date and its age on one line, the action
+   itself on the next, in full. It wraps; it is never clipped and never scrolled. */
+.roster__nextcell { color: var(--pl-fg); }
+.roster__next { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2); }
+.roster__nexttxt { flex: 1 1 100%; font-weight: 600; color: var(--pl-fg); }
+
+/* LEGACY - the pre-2026-08-23 markup still used by stories/Roster.stories.js
+   (Design System Lead's surface). Inert in the product. */
+.roster__cellclamp {
+  max-width: 15rem; white-space: normal;
+  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  color: var(--pl-fg-body);
+}
+.roster__emailcell { color: var(--pl-fg-body); font-variant-numeric: tabular-nums; }
+
+/* Stage pill = a native select styled as a colored pill; color driven by token. */
+.roster__stage {
+  appearance: none; -webkit-appearance: none;
+  font-family: inherit; font-weight: 600; font-size: 0.72rem; line-height: 1.5;
+  border-radius: var(--radius-full); cursor: pointer;
+  padding-block: 0.22rem; padding-inline-start: 0.7rem; padding-inline-end: var(--space-5);
+  border: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+  background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6b73' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  transition: box-shadow 0.2s var(--ease-pl);
+}
+[dir="rtl"] .roster__stage { background-position: left 0.5rem center; }
+.roster__stage:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
+}
+.roster__stage--invited     { color: var(--pl-stage-invited);     background-color: color-mix(in srgb, var(--pl-stage-invited) 12%, var(--pl-surface)); }
+.roster__stage--interested  { color: var(--pl-stage-interested);  background-color: color-mix(in srgb, var(--pl-stage-interested) 12%, var(--pl-surface)); }
+.roster__stage--call_booked { color: var(--pl-stage-call_booked); background-color: color-mix(in srgb, var(--pl-stage-call_booked) 12%, var(--pl-surface)); }
+.roster__stage--confirmed   { color: var(--pl-stage-confirmed);   background-color: color-mix(in srgb, var(--pl-stage-confirmed) 12%, var(--pl-surface)); }
+.roster__stage--attended    { color: var(--pl-stage-attended);    background-color: color-mix(in srgb, var(--pl-stage-attended) 12%, var(--pl-surface)); }
+.roster__stage--dropped     { color: var(--pl-stage-dropped);     background-color: color-mix(in srgb, var(--pl-stage-dropped) 12%, var(--pl-surface)); }
+/* Native option list uses system colors; keep options readable regardless of pill tint. */
+.roster__stage option { color: var(--pl-fg); background: var(--pl-surface); }
+
+/* Detail (expand) row: the inline editor for one lead. */
+.roster__detailrow > td { background: var(--pl-bg-alt); padding: var(--space-4); white-space: normal; }
+.roster__detail {
+  display: grid; gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  align-items: start;
+}
+/* Three fields, three columns - auto-fit was opening five tracks and leaving
+   half the panel empty on a wide screen. */
+@media (min-width: 1024px) { .roster__detail { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.roster__field { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.roster__field--wide { grid-column: 1 / -1; }
+.roster__fieldlbl {
+  font-weight: 600; font-size: 0.72rem; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--pl-fg-secondary);
+}
+.roster__input--sm { height: var(--ctl-sm); flex: none; min-width: 0; width: 100%; font-size: var(--text-sm); }
+
+/* Every free-text control here is a textarea that GROWS to fit (JS: autoGrow).
+   No single-line box survives in this panel - a one-line input is exactly what
+   made `צעד הבא` scroll sideways. Starts at the 40px rung of the control ladder
+   so it still lines up with the phone input beside it. */
+.roster__ta {
+  width: 100%; min-height: var(--ctl-sm); height: auto;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--pl-border-strong); border-radius: var(--radius-md);
+  background: var(--pl-surface); color: var(--pl-fg);
+  font-family: inherit; font-size: var(--text-sm); line-height: 1.5;
+  box-shadow: var(--shadow-pl-sm);
+  resize: none; overflow: hidden;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  transition: border-color 0.2s var(--ease-pl), box-shadow 0.2s var(--ease-pl);
+}
+.roster__ta::placeholder { color: var(--pl-fg-muted); }
+.roster__ta:focus {
+  outline: none; border-color: var(--pl-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-accent) 18%, transparent);
+}
+
+/* ---- Note log: an ADD box over a READ-ONLY history ------------------------
+   One dated line per fact, newest on top, and every entry gets its OWN wrapper -
+   Ofir 2026-08-23: "I want each item to have its own wrapper visually within
+   this text." Nothing here is editable in place: the convention is append-only
+   (a correction is a new dated line), so the interface simply offers no way to
+   destroy one. Direction on every entry, and on every quote inside an entry, is
+   resolved from that text's own first strong character - never from the site
+   language toggle. */
+.rnotes { gap: var(--space-2); }
+.rnotes__add { display: flex; align-items: flex-start; gap: var(--space-2); }
+.rnotes__new { flex: 1 1 auto; min-width: 0; }
+.rnotes__addbtn { flex: none; }
+.rnotes__addbtn svg { width: var(--icon-sm); height: var(--icon-sm); }
+.rnotes__list { display: grid; gap: var(--space-2); margin-top: var(--space-1); }
+.rnotes__empty { margin: 0; color: var(--pl-fg-muted); font-size: var(--text-sm); font-weight: 500; }
+.rnotes__raw { display: none; }
+
+.rnote {
+  display: grid; gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md);
+  background: var(--pl-surface);
+}
+.rnote__head { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-2); }
+.rnote__chip {
+  flex: none; padding: var(--space-1) var(--space-2); border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--pl-fg) 8%, transparent);
+  color: var(--pl-fg-secondary);
+  font-size: var(--text-caption); font-weight: 700; line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+/* Pre-convention prose. Marked, kept, never silently reformatted. */
+.rnote__chip--legacy {
+  background: color-mix(in srgb, var(--pl-crew-orange) 14%, transparent);
+  color: var(--pl-crew-orange);
+  font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.rnote__age { font-size: var(--text-caption); font-weight: 500; color: var(--pl-fg-muted); }
+.rnote__body {
+  margin: 0; font-size: var(--text-sm); line-height: 1.6;
+  color: var(--pl-fg-body); overflow-wrap: anywhere;
+}
+/* Their words, verbatim. */
+.rnote__q { font-style: italic; font-weight: 500; color: var(--pl-fg); }
+/* Our read, not a fact: muted, and labelled so the difference is visible. */
+.rnote--opinion { background: color-mix(in srgb, var(--pl-fg) 3%, var(--pl-surface)); }
+.rnote--opinion .rnote__body { color: var(--pl-fg-secondary); }
+.rnote__tag {
+  font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--pl-fg-muted);
+}
+.rnote--legacy { border-style: dashed; }
+
+.roster__detailbar {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-3);
+}
+.roster__savemsg { font-size: var(--text-sm); font-weight: 600; }
+.roster__savemsg--ok { color: var(--pl-stage-confirmed); }
+.roster__savemsg--err { color: var(--pl-stage-dropped); }
+
+/* ---- Below 1024: stack the CRM table into one card PER user --------------
+   A multi-column table can't fit a phone, so instead of side-scrolling we turn
+   each row into a card and each cell into a "LABEL -> value" line (every td
+   already carries data-label = the column header). One outline per card, NO
+   per-field dividers, so it reads clean, not like a pile of lines.
+   THE BREAKPOINT IS 1023, NOT 760 (raised 2026-08-23): between those two widths
+   the table technically fitted but `מקור` and `צעד הבא` were down to ~60px each,
+   which is a table that fits and cannot be read. Cards are the better answer for
+   the whole tablet range; the table only renders where it has real room. */
+@media (max-width: 1023px) {
+  .roster__scroll {
+    overflow-x: visible; overflow-y: visible; border: none; background: transparent;
+    box-shadow: none; border-radius: 0;
+  }
+  .roster__table { display: block; width: 100%; font-size: var(--text-body); }
+  .roster__table thead { display: none; }
+  .roster__table tbody { display: block; width: 100%; }
+
+  .roster__table tr.roster__row {
+    display: block;
+    border: 1px solid var(--pl-border); border-radius: var(--radius-lg);
+    background: var(--pl-surface); box-shadow: var(--shadow-pl-sm);
+    padding: 0.4rem 1rem; margin-bottom: 0.85rem;
+  }
+  .roster__table tr.roster__row > td {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-4); border: none; padding: 0.62rem 0;
+    white-space: normal; text-align: end; max-width: none;
+  }
+  .roster__table tr.roster__row > td::before {
+    content: attr(data-label); flex: none; text-align: start;
+    font-weight: 600; font-size: 0.72rem; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--pl-fg-secondary);
+  }
+  /* expand chevron sits alone at the card's top corner, unlabeled */
+  .roster__table tr.roster__row > td.roster__expandcell {
+    justify-content: flex-end; padding-bottom: 0.15rem; width: auto;
+  }
+  .roster__table tr.roster__row > td.roster__expandcell::before { content: none; }
+  /* actions: label at start, buttons grouped at the end */
+  .roster__table tr.roster__row > td.roster__actions { justify-content: flex-start; }
+  .roster__table tr.roster__row > td.roster__actions::before { margin-inline-end: auto; }
+  /* Free text and the person block put the label ABOVE the value and take the
+     full card width - a wrapped paragraph squeezed against its own label reads
+     worse than no label at all. */
+  .roster__table tr.roster__row > td.roster__stack { display: block; text-align: start; }
+  .roster__table tr.roster__row > td.roster__stack::before {
+    display: block; margin-bottom: var(--space-1);
+  }
+  .roster__table tr.roster__row > td.roster__nextcell { padding-bottom: var(--space-2); }
+  /* legacy (Storybook) markup: stacked cells show their text in full */
+  .roster__cellclamp { -webkit-line-clamp: unset; display: block; }
+
+  /* Inline editor: a distinct panel tucked under its card (only when open;
+     respect the [hidden] attribute that gates the closed rows) */
+  .roster__table tr.roster__detailrow:not([hidden]) { display: block; }
+  .roster__table tr.roster__detailrow > td {
+    display: block; border-radius: var(--radius-md);
+    margin: -0.5rem 0 0.85rem; padding: var(--space-4);
+  }
+}
+
+/* Phone: the add-entry box and its button stop competing for one line. */
+@media (max-width: 560px) {
+  .rnotes__add { flex-direction: column; align-items: stretch; }
+  .rnotes__addbtn { align-self: flex-start; }
+}
+
+/* ---- WHY NOW — centered header + three rounded numbered tiles ------------- */
+/* The cursor field is a direct child of the SECTION (not .wrap), so it spans
+   the full section incl. padding-block - cursors disappear at the section's
+   bottom, never mid-card (Ofir 2026-08-20). The section is the positioning
+   context; .why no longer needs to be. */
+.why-section { position: relative; }
+.why { text-align: center; }
+.why .why__title { max-width: 24ch; margin-inline: auto; }
+[dir="rtl"] .why { text-align: right; }
+[dir="rtl"] .why .why__title { margin-inline: 0; }
+
+/* tiles reuse .card; crisp border, text leads from the start edge */
+.why .card { text-align: start; border-color: var(--pl-border-strong); }
+[dir="rtl"] .why .card { text-align: right; }
+.whytile__num {
+  display: inline-grid; place-items: center;
+  width: var(--ctl-sm); height: var(--ctl-sm); border-radius: var(--radius-md);
+  margin-bottom: var(--space-4); direction: ltr;
+  background: color-mix(in srgb, var(--pl-accent) 12%, transparent);
+  color: var(--pl-accent);
+  font-size: 1.25rem; font-weight: 700; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- "Working canvas" cursors (WHY NOW) ---------------------------------- */
+/* Colorful tool-tagged collaborator cursors drift over the section. The field
+   sits above the tiles but is click-through (pointer-events:none); cursors are
+   moved via transform only. Cleaned up + paused per prefers-reduced-motion in JS. */
+.cursorfield {
+  position: absolute; inset: 0; overflow: hidden;
+  pointer-events: none; z-index: 3; direction: ltr;
+}
+.pcursor {
+  position: absolute; top: 0; left: 0; width: 26px; height: 26px;
+  will-change: transform;
+}
+.pcursor__arrow {
+  display: block; width: 26px; height: 26px;
+  fill: var(--pc); stroke: #fff; stroke-width: 1.3;
+  stroke-linejoin: round; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
+}
+.pcursor__tag {
+  position: absolute; top: 17px; left: 15px;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 37px; height: 37px; border-radius: 11px;
+  background: #fff; border: 1.5px solid var(--pc);
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.18);
+}
+/* logos fill the chip (CSS wins over the inline SVG width/height) */
+.pcursor__tag svg { display: block; width: 29px; height: 29px; }
+/* Figma's mark is portrait (38x57) — size by height so it keeps its aspect */
+.pcursor__tag svg[viewBox="0 0 38 57"] { width: auto; height: 29px; }
+@media (prefers-reduced-motion: reduce) {
+  .pcursor { opacity: 0.85; }   /* JS scatters them statically, no motion */
+}
+/* Ofir's call (2026-08-20): the cursors roam the whole section on EVERY width,
+   phones included - over the stacked cards too. They are click-through
+   decoration; do not fence them off the copy and do not hide them on mobile. */
+
+/* ---- RTL ----------------------------------------------------------------- */
+[dir="rtl"] body,
+[dir="rtl"] .hero__title, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 {
+  font-family: "Heebo", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+/* The hero is CENTERED in both directions by design (one-view hero, 2026-08-20).
+   .hero__title/.hero__sub were removed from this right-align group after they
+   silently beat the hero's own text-align:center in Hebrew (specificity 0,1,1
+   vs 0,1,0) - the same bug solved once before on the demo page. Section titles
+   keep the RTL right-align. */
+[dir="rtl"] .section-title, [dir="rtl"] .section-lead { text-align: right; }
+[dir="rtl"] .deliv__item, [dir="rtl"] .phase, [dir="rtl"] .incl__item,
+[dir="rtl"] .aphase__head, [dir="rtl"] .aphase__item,
+[dir="rtl"] .panel li, [dir="rtl"] .btn { direction: rtl; }
+[dir="rtl"] .card__ico, [dir="rtl"] .deliv__num { }
+
+/* elements that should NOT mirror (keep LTR): brand wordmark, wa numbers */
+[dir="rtl"] .lang { direction: ltr; }
+
+/* ---- Placeholder flag (removed when copy lands) -------------------------- */
+.ph-flag {
+  position: fixed; bottom: 12px; inset-inline-end: 12px; z-index: 100;
+  background: var(--pl-accent); color: #fff; font-size: var(--text-caption); font-weight: 700;
+  padding: 0.4rem 0.7rem; border-radius: var(--radius-full); box-shadow: var(--shadow-pl-md);
+  letter-spacing: 0.02em;
+}
+
+/* ---- Ofir revisions (2026-08-03) ---------------------------------------- */
+/* text wordmark replaces logo image (nav + footer) */
+/* THE WORDMARK NEVER WRAPS. Root cause of the recurring "Product / Lab" split:
+   on mobile the brand is absolutely positioned at left:50%, and an abs-positioned
+   box with a left offset shrink-fits to the space between that offset and the
+   right edge - about half the bar - so on a real phone (and any iOS text-size
+   bump) the name exceeded it and wrapped. Headless shots at default metrics never
+   caught it. nowrap makes wrapping impossible; width:max-content (below) sizes
+   the box to the NAME instead of to the half-bar. Do not remove either. */
+.nav__brand--text { font-weight: 700; color: var(--pl-accent); font-size: 1.5rem; letter-spacing: -0.03em; text-decoration: none; white-space: nowrap; }
+.footer__wordmark { font-weight: 700; color: var(--pl-accent); font-size: 1.35rem; letter-spacing: -0.03em; }
+
+/* icon on every accordion row in the unified Details section */
+.faq__q { display: inline-flex; align-items: center; gap: 0.7rem; }
+.faq__q svg { flex: none; width: 20px; height: 20px; color: var(--pl-accent); }
+.faq details[open] > summary .faq__q svg { color: var(--pl-accent); }
+
+/* mobile nav — keep it from overflowing on phones (drop the secondary student
+   button, tighten spacing, ease the wordmark down).
+   NOTE: do NOT put overflow-x:hidden on html/body — it breaks position:sticky. */
+@media (max-width: 620px) {
+  /* 3-zone header: WhatsApp (left) · wordmark (center) · hamburger (right).
+     PHYSICAL left/right (not logical) so it's identical in HE and EN. */
+  .nav__in { position: relative; display: block; height: var(--nav-h-mobile); }
+  .nav__brand { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; width: max-content; }
+  /* wordmark is one size on every surface -- no mobile override */
+  .nav__book { position: absolute; left: var(--pad-x); top: 50%; transform: translateY(-50%);
+    width: 2.5rem; padding-inline: 0; gap: 0; }
+  .nav__book .btn__label { display: none; }
+  /* icon-only on mobile, but the WhatsApp glyph stays the persistent 20px */
+  .nav__book svg { width: 20px; height: 20px; }
+  .nav__burger { position: absolute; right: var(--pad-x); top: 50%; transform: translateY(-50%); display: inline-grid; }
+
+  /* Account avatar takes the physical-left slot (same as WhatsApp on the main
+     page). Menu opens toward center from the left-anchored avatar so it stays
+     on-screen in both HE and EN. */
+  .nav__account { position: absolute; left: var(--pad-x); top: 50%; transform: translateY(-50%); }
+  .nav__accmenu { inset-inline-end: auto; inset-inline-start: auto; left: 0; right: auto; }
+
+  /* language + student collapse into a dropdown TRAY under the header */
+  .nav__menu {
+    position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; gap: 0.6rem; padding: 0.85rem var(--pad-x) 1.1rem;
+    background: var(--pl-bg); border-bottom: 1px solid var(--pl-border); box-shadow: var(--shadow-pl-md);
+    display: none; z-index: 40;
+  }
+  .nav__menu.is-open { display: flex; }
+  /* MOBILE tray: hide the desktop globe dropdown, show the text toggle instead */
+  .langswitch { display: none; }
+  .nav__menu > .langtoggle { display: inline-grid; }
+  .nav__menu .langtoggle, .nav__menu .nav__student { width: 100%; height: var(--ctl-md); justify-content: center; }
+  .nav__menu .langtoggle {
+    border: 1px solid var(--pl-border-strong); border-radius: var(--radius-md);
+    background: var(--pl-surface); color: var(--pl-fg); font-size: var(--text-body);
+  }
+  .nav__menu .nav__student .btn__label { display: inline; }
+
+  /* (old hero--scene mobile rules removed with the scene hero, 2026-08-20) */
+  /* headline wraps naturally on phone (the EN forced break is off globally) */
+
+  /* agenda cards -> stacked (badge on top, then title, then description) */
+  .phase { grid-template-columns: 1fr; gap: var(--space-3); }
+  .phase__time { justify-self: start; }
+
+  /* expandable agenda: time badge top-left, toggle top-right, intro spans below */
+  .aphase__head { grid-template-columns: 1fr auto; column-gap: var(--space-4); row-gap: 0.8rem; padding: 1.3rem 1.35rem; }
+  .aphase__head .phase__time { justify-self: start; align-self: center; }
+  .aphase__intro { grid-column: 1 / -1; }
+  .aphase__toggle { align-self: center; }
+  .aphase__items { padding: 0 1.35rem 1.3rem; }
+}
+
+/* on phones use the PORTRAIT hero image as-is (no mirror) so it reads clearly */
+
+/* ===== THE TEAM — one bounded panel: leader on top, AI crew grouped below ===== */
+.team { margin-top: var(--space-6); border: 1px solid var(--pl-border); border-radius: var(--radius-2xl);
+  background: var(--pl-surface); box-shadow: var(--shadow-pl-md); overflow: hidden; }
+.team__lead { display: grid; grid-template-columns: 1fr; gap: clamp(1.25rem, 3vw, 2rem);
+  align-items: center; padding: clamp(1.5rem, 4vw, 2.5rem); }
+@media (min-width: 760px) { .team__lead { grid-template-columns: auto 1fr; } }
+.team__photo { width: clamp(120px, 22vw, 176px); border-radius: var(--radius-xl); overflow: hidden;
+  border: 1px solid var(--pl-border); box-shadow: var(--shadow-pl-sm); }
+[dir="rtl"] .team__photo { justify-self: start; }
+.team__photo img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: center top; display: block; }
+.team__kicker { display: inline-block; font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--pl-accent); margin-bottom: var(--space-2); }
+.team__name { font-size: var(--text-h2); font-weight: 700; color: var(--pl-fg); margin-bottom: var(--space-3); }
+.team__leadtext p { color: var(--pl-fg-body); font-weight: 500; margin-bottom: var(--space-3); }
+.team__leadtext p:last-child { margin-bottom: 0; }
+/* the crew band — tinted so the three read as one grouped set */
+.team__crew { background: var(--pl-bg-alt); border-top: 1px solid var(--pl-border); padding: clamp(1.5rem, 4vw, 2rem); }
+/* clear breathing room between the intro copy and the cards (and cards→closing
+   line) — bigger than the 1rem paragraph rhythm so the block reads as separate */
+.team__agents { display: grid; gap: var(--space-4); grid-template-columns: 1fr; margin-block: clamp(1.75rem, 4.5vw, 2.75rem); }
+@media (min-width: 720px) { .team__agents { grid-template-columns: repeat(3, 1fr); } }
+.agentcard { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius-lg);
+  border: 1px solid var(--pl-border); background: var(--pl-surface); box-shadow: var(--shadow-pl-sm); }
+.agentcard__illo { height: 13rem; overflow: hidden; background: var(--pl-illo-bg); }
+.agentcard__illo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+/* mobile: cards go full-width, so the fixed 10rem strip crops the character to
+   just the face. Give the illo more height to reveal the hands/props it's holding. */
+@media (max-width: 719.98px) { .agentcard__illo { height: 17rem; } }
+.agentcard__body { padding: 1.1rem 1.25rem; }
+/* archetype badge — reuses the system tinted-purple pill (accent 12% bg + accent fg),
+   same recipe as .phase__time / .card__ico. Sits above the role title. */
+.agentcard__tag { display: inline-block; font-weight: 700; font-size: var(--text-caption);
+  letter-spacing: 0.03em; color: var(--pl-accent);
+  background: color-mix(in srgb, var(--pl-accent) 12%, transparent);
+  border-radius: var(--radius-full); padding: 0.25rem 0.75rem; margin-bottom: 0.6rem; }
+.agentcard__role { font-weight: 700; color: var(--pl-fg); font-size: var(--text-h3); margin-bottom: 0.35rem; }
+.agentcard__body p { color: var(--pl-fg-body); font-weight: 500; font-size: var(--text-sm); }
+
+/* ---- .avatar-stack — avatar circle row (molecule, 2026-09-06) -------------
+   Items on the control ladder (--ctl-sm). DOM order = reading order.
+   ⛔ v3 (Ofir, 2026-09-07): back to interactive - a small "examples" block
+   below the S0 CTA, real crew photos only, hover/tap shows a tooltip.
+   ⛔ v4 (Ofir, 2026-09-07, same day): the row now holds the FULL real-
+   portrait roster (10, not 3) and needs to wrap on narrow screens - swapped
+   the fixed-3 overlap trick (negative margin-inline-start, breaks across a
+   wrap boundary) for the SAME wrap+gap recipe already used by .cta-row.
+   Tooltip is .avatar-tip below, not [data-tooltip] - see that block for why. */
+.avatar-stack { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2); margin: 0 auto var(--space-4); max-width: 26rem; padding-top: var(--space-3); }
+.avatar-stack__item {
+  position: relative; flex: none; width: var(--ctl-sm); height: var(--ctl-sm);
+  padding: 0; border: 2px solid var(--pl-surface); border-radius: var(--radius-full);
+  background: var(--pl-illo-bg); box-shadow: 0 0 0 1px var(--pl-border);
+  transition: transform 0.15s var(--ease-pl), box-shadow 0.2s var(--ease-pl);
+}
+.avatar-stack__item img {
+  width: 100%; height: 100%; border-radius: var(--radius-full); display: block;
+  object-fit: cover; object-position: center top;
+}
+/* ⛔ v6 (Ofir, 2026-09-07, same day): tile size is FIXED - screen width is
+   the only thing allowed to change it, never hover state. The earlier v5
+   width/height grow is reverted; hover only lifts (transform), same as it
+   always did. padding-top on .avatar-stack above stays: real headroom for
+   the lift + tooltip regardless of viewport. */
+.avatar-stack__item:hover, .avatar-stack__item:focus-visible, .avatar-stack__item[data-tip-open] {
+  z-index: 2; transform: translateY(-2px);
+  box-shadow: 0 0 0 1px var(--pl-border), var(--shadow-pl-md);
+}
+.avatar-stack__item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-accent) 22%, transparent), var(--shadow-pl-md);
+}
+@media (prefers-reduced-motion: reduce) { .avatar-stack__item { transition: none; } }
+/* Initial-in-a-disc mark - still used by S6 loading's library-role rotator
+   (no portrait exists for those), generalized from .quote__av /
+   .chip__logo--initial. Not used on S0 any more (v3, real photos only). */
+.avatar-initial { width: 100%; height: 100%; display: grid; place-items: center; font-weight: 700; color: var(--pl-accent); }
+.avatar-initial svg { width: 44%; height: 44%; }
+/* ---- .avatar-tip — real DOM tooltip for the S0 agent row (2026-09-07) -----
+   A plain [data-tooltip] renders via CSS `content: attr()`, one run of
+   uniform text - it cannot bold a name and leave a description regular.
+   This is a real child element instead, built from the EXACT same
+   light-theme tooltip recipe below ([data-tooltip][data-tip-theme="light"]):
+   same surface/border/radius/shadow/arrow/transition, just swapping
+   generated content for two styled child nodes. Shown the same way (hover,
+   keyboard focus, or a pinned tap via [data-tip-open] - wired by the SAME
+   data-fleet-avatar handler the old [data-tooltip] version used).
+   Opens BELOW the avatar, not above: the title sits only var(--space-7)
+   above the row, not enough clearance for a 2-line bubble to pop up without
+   overlapping the title text (found by hovering the live render - real
+   collision, not a hypothetical). Below has the card's own bottom padding
+   to open into.
+   ⛔ v5 (Ofir, 2026-09-07, same day): a centered bubble near either end of
+   the row went off-screen; clipping it with overflow-x:hidden (the fix
+   shipped one round ago) just cut its own content off mid-sentence - wrong
+   fix, caught live. Real fix is JS (fleetPositionTip in app.js): shifts
+   `left` away from 50% only when the bubble would overflow the viewport,
+   and moves the arrow via --tip-arrow-x so it still points at the avatar. */
+.avatar-tip {
+  position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%) translateY(4px);
+  background: var(--pl-surface); color: var(--pl-fg);
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md); box-shadow: var(--shadow-pl-md);
+  padding: var(--space-2) var(--space-3); max-width: 16rem; width: max-content; text-align: center;
+  opacity: 0; pointer-events: none; z-index: 100;
+  transition: opacity 0.12s var(--ease-pl), transform 0.12s var(--ease-pl);
+}
+.avatar-tip::after {
+  content: ""; position: absolute; left: var(--tip-arrow-x, 50%); bottom: 100%; width: 10px; height: 10px; margin-bottom: -5px;
+  background: var(--pl-surface); border-left: 1px solid var(--pl-border); border-top: 1px solid var(--pl-border);
+  transform: translateX(-50%) rotate(45deg);
+}
+.avatar-tip strong { display: block; font-weight: 700; font-size: var(--text-sm); color: var(--pl-fg); }
+.avatar-tip span { display: block; font-weight: 500; font-size: var(--text-sm); color: var(--pl-fg-secondary); margin-top: 2px; }
+.avatar-stack__item:hover .avatar-tip, .avatar-stack__item:focus-visible .avatar-tip, .avatar-stack__item[data-tip-open] .avatar-tip {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+/* ---- .fleet-agents — the S0 "examples" block under the CTA (2026-09-07) --
+   Supporting content, not a second hero: .field__label (one merged title,
+   v4 - a separate .ss-note sub-line was redundant, Ofir cut it), spaced off
+   the CTA with margin only - a divider/border here is explicitly unwanted. */
+.fleet-agents { margin-top: var(--space-7); }
+.fleet-agents .field__label { margin-bottom: var(--space-4); font-size: var(--text-caption); font-weight: 600; }
+
+/* ===== Student sign-in MODAL (opens from the header button) ===== */
+body.modal-open { overflow: hidden; }
+/* Overflow-safe modal: the minmax() spacer rows center the card when it fits and
+   collapse when the form is taller than the phone, so .modal scrolls the WHOLE
+   card (submit included) with nothing clipped off the top. */
+.modal { position: fixed; inset: 0; z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  display: grid; grid-template-rows: minmax(1.25rem, 1fr) auto minmax(1.25rem, 1fr);
+  justify-items: center; padding-inline: 1.25rem; }
+.modal[hidden] { display: none; }
+.modal__overlay { position: fixed; inset: 0; background: var(--pl-scrim); backdrop-filter: blur(2px); }
+.modal__card { grid-row: 2; position: relative; z-index: 1; width: 100%; max-width: 27rem; text-align: center;
+  background: var(--pl-surface); border: 1px solid var(--pl-border); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-pl-lg); padding: clamp(1.75rem, 5vw, 2.5rem);
+  animation: modalIn 0.22s var(--ease-pl); }
+@keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+.modal__close { position: absolute; top: 0.85rem; inset-inline-end: 0.85rem; width: 2rem; height: 2rem;
+  display: grid; place-items: center; border: 0; background: transparent; color: var(--pl-fg-secondary);
+  border-radius: var(--radius-md); transition: background-color 0.2s var(--ease-pl), color 0.2s var(--ease-pl); }
+.modal__close:hover { background: var(--pl-bg-alt); color: var(--pl-fg); }
+.modal__close svg { width: 18px; height: 18px; }
+
+/* ============================================================================
+   HERO — text lives ON the image at every width, and can never reach the
+   characters, because both are fractions of the same box.
+
+   Two photographs, swapped by viewport width alone:
+     <= 760px  portrait asset (1600x2233) - characters begin at 45% of height
+     >  760px  16:9 asset     (2560x1440) - characters begin at 40% of height
+   (Those percentages are measured from the pixels, per-row variance down the
+   centre column. Re-measure if an image is replaced.)
+
+   The hero takes the ACTIVE image's own aspect ratio, so the photo is never
+   cropped and never letterboxed - the image IS the background, edge to edge.
+   The hero is a size container and every piece of text, the gaps between them
+   and the button are all sized in cqh (fractions of the hero's height). Text
+   and image therefore scale on ONE curve: shrink the screen and the type
+   shrinks with the room, exactly like lowering a poster. The text block is
+   budgeted to ~80% of the safe band, so the button's bottom edge always keeps
+   clearance above the characters. No floors that could outgrow the band; the
+   probe (hero-probe.js, 24 viewports) asserts the button stays inside the band
+   and no text drops below 12px.
+   ============================================================================ */
+
+.hero--oneview{
+  position:relative; overflow:hidden; background:transparent;
+  padding-top:0 !important; display:block;
+  height:auto; aspect-ratio:1024/1536;          /* portrait asset's own ratio (v3, 2026-09-08) */
+  container-type:size;
+}
+@media (min-width:761px){
+  .hero--oneview{ aspect-ratio:2560/1440; }     /* 16:9 asset's own ratio */
+}
+
+/* the image is the background: absolute, full box, its own ratio, no crop.
+   FIRST-LOAD ZOOM (2026-08-22, Ofir approved: 2%, 1200ms, ease-out, fired as
+   the brand curtain lifts). Two rules make it behave:
+
+   1. THE 2% LIVES IN THE BOX, NOT IN A PERMANENT TRANSFORM. The box is drawn
+      2% oversize (inset:-1% resolves against width for the sides and height
+      for top/bottom, so the ratio is untouched and object-fit:cover is still
+      an exact fit). At rest there is NO transform at all - the photo
+      rasterises at full resolution and nothing stays composited once the move
+      is over. A permanent scale(1.02) would have left it slightly soft for the
+      whole visit for the sake of 1.2 seconds.
+   2. THE ANIMATION STARTS FROM THE RECIPROCAL. 1/1.02 = 0.980392, which is
+      EXACTLY the framing that shipped before this - so the move begins on the
+      old frame and settles onto the new one.
+
+   Only .hero__bg moves. .hero__content (title, sub, button) is a sibling
+   outside it and does not shift by a single pixel - measured, 0.0000px drift
+   across 146 frames. The hero already has overflow:hidden, so the 2% is clipped.
+
+   The `pl-zoom` class is put on <html> by assets/intro.js and by nothing else,
+   at the moment the curtain starts lifting (or the moment a visitor dismisses
+   it early). No class = no animation = the resting frame, which is what a
+   repeat visit, a deep link, a reduced-motion visitor and a failed intro.js
+   all correctly get. */
+.hero__bg{ position:absolute; inset:-1%; margin:0; z-index:0; line-height:0; font-size:0; }
+.hero__bg img{ width:100%; height:100%; max-height:none; display:block; object-fit:cover; object-position:center; }
+
+@keyframes hero-zoom{ from{ transform:scale(0.980392) } to{ transform:scale(1) } }
+/* Parked from the instant the curtain goes up, so the photo is ALREADY on the
+   old framing before anything is visible. Without this it sat at the resting
+   frame and snapped back at the lift — measured behind a 98%-opaque curtain,
+   so invisible in practice, but a 2% leak is not a thing to leave in on
+   purpose. The animation below fills `both`, so it owns the transform during
+   the move and holds scale(1) after it, outranking this park for good. */
+html.pl-zoom-park .hero__bg{ transform: scale(0.980392); }
+html.pl-zoom .hero__bg{ animation: hero-zoom 1200ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+/* backstop only - intro.js never adds the class under reduced motion anyway */
+@media (prefers-reduced-motion: reduce){ html.pl-zoom .hero__bg{ animation: none; } }
+
+/* DESKTOP ZOOM, MADE PROFOUND (2026-08-25, Ofir: the 2% move read as
+   unnoticeable on desktop). Same mechanism as above, 6x the distance: 12%
+   oversize box (inset -6%, so 1/1.12 = 0.892857 is the reciprocal start
+   scale) over a slightly longer 1600ms so the bigger move still settles
+   smoothly on the same easing curve. Mobile keeps the original 2% - it
+   reads fine there and wasn't the complaint. */
+@media (min-width:761px){
+  .hero__bg{ inset:-6%; }
+  @keyframes hero-zoom-desktop{ from{ transform:scale(0.892857) } to{ transform:scale(1) } }
+  html.pl-zoom-park .hero__bg{ transform: scale(0.892857); }
+  html.pl-zoom .hero__bg{ animation: hero-zoom-desktop 1600ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+  @media (prefers-reduced-motion: reduce){ html.pl-zoom .hero__bg{ animation: none; } }
+}
+
+/* the safe band: 45% of the portrait scene, 40% of the wide one */
+.hero__content{
+  position:absolute; top:0; left:0; right:0; height:45%; z-index:2;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  padding:calc(3.2cqh + 24px) 1.1rem 0; text-align:center;
+}
+@media (min-width:761px){
+  /* Ofir 2026-08-20: sit the text block 64px lower on desktop (8px grid).
+     The centre column the text occupies is clear down to ~45.7% of the scene
+     (measured), so the drop fits inside the clearance at laptop widths and up.
+     On the small-desktop range (761-1179) the hero is short enough that 64px
+     is ~13% of it and would land the button on the characters, so the drop
+     steps down the grid there: 16px. */
+  .hero__content{ height:40%; padding-top:calc(4.2cqh + 16px); }
+}
+@media (min-width:1180px){
+  .hero__content{ padding-top:calc(4.2cqh + 64px); }
+}
+
+.hero__title{ margin:0; max-width:100%; overflow-wrap:break-word; letter-spacing:-0.02em; text-align:center; }
+.hero__title .mark{ color:var(--pl-accent); }
+
+/* All type in cqh = one curve with the image. Ceilings only, no big floors.
+   font-weight: 800 is intentional here, not a stray - Ofir confirmed 2026-09-07
+   ("leave it 800") after seeing it next to 700 side by side. Sanctioned
+   exception for the hero title only; the rest of the system's heaviest weight
+   is 700. Don't "fix" this to 700 elsewhere without asking again. */
+/* cqh multipliers re-tuned 2026-09-08 (7.2->6.7, 4.6->4.3): the v3 mobile
+   hero image is a taller aspect-ratio than v2 (1024/1536 vs 1061/1482), so
+   the SAME cqh coefficients now compute a bigger px font from a taller
+   container - just enough to push ht2 ("...עם סוכני AI.") from one line to
+   two, adding a 3rd total title line on mobile. Scaled both coefficients by
+   544.75/585 (old mobile hero height / new) to land back on the exact same
+   px size at the new mobile height - real 1-line fit measured, not eyeballed
+   - while keeping this the SAME single formula for both breakpoints (the
+   comment above is the reason: "one curve with the image", not a fork). */
+.ht1{ display:block; font-weight:800; color:var(--pl-fg); line-height:1.12;
+      font-size:clamp(1.5rem, 6.7cqh, 5rem); }
+.ht2{ display:block; font-weight:800; color:var(--pl-fg); line-height:1.15;
+      font-size:clamp(1rem, 4.3cqh, 3rem); margin-top:0.3cqh; }
+
+/* balance the wrap so no row ends on one orphaned word */
+.hero__sub{ margin:1.4cqh 0 0; color:var(--pl-fg-body); font-weight:500; text-align:center;
+  max-width:min(60ch, 98%); text-wrap:balance; }
+.sd{ display:block; line-height:1.5; font-size:clamp(0.85rem, 3cqh, 1.5rem); text-wrap:balance; }
+/* "בזמן אמת." / "In real time." always gets its own centered row (Ofir, 2026-08-24)
+   — it used to merge inline with the line above once the viewport was wide enough
+   to fit both, same base .sd{display:block} that mobile always had. */
+@media (min-width:761px){
+  .sd{ font-size:clamp(0.85rem, 2.5cqh, 1.5rem); }
+}
+
+/* Secondary CTA restored 2026-09-08, stacked layout (Ofir tested 3 live
+   layouts, chose this one): primary on top, secondary below, both centered,
+   narrow, SAME font-size (never let one auto-shrink relative to the other -
+   Ofir's direct instruction after catching that exact bug). Same rule for
+   every viewport, no separate desktop override. */
+.hero__cta{
+  display:flex; flex-direction:column; align-items:center;
+  gap:8px; margin-top:6px;
+}
+/* Mobile also on the CANONICAL .btn scale now (Ofir, 2026-09-08, 3rd pass -
+   was shrunk to fit the stacked layout, he wants the real system size on
+   every viewport, no exceptions). width:100% (not a fixed px) keeps both
+   buttons equal-width for free and gives the longer label room at the
+   bigger font, on any card width. */
+.hero__cta .btn{
+  width:100%; height:var(--ctl-md); padding-inline:var(--space-5);
+  font-size:var(--text-body); border-radius:var(--radius-md);
+  border-width:1.5px; border-style:solid; cursor:pointer;
+}
+/* Desktop (Ofir, 2026-09-08): side by side, not stacked - mobile stays
+   stacked (declared above). Equal width on BOTH layouts: mobile gets it for
+   free (both width:100%); desktop pins both to the same min-width, sized to
+   the longer label, so neither is ever narrower than its own text
+   (white-space:nowrap - never wraps, per the standing rule). Font/height/
+   padding/radius are already the canonical tokens from the base rule above -
+   only width and nowrap actually differ here. */
+@media (min-width:761px){
+  .hero__cta{ flex-direction:row; justify-content:center; gap:12px; }
+  .hero__cta .btn{ width:auto; min-width:230px; white-space:nowrap; }
+  /* Ofir, 2026-09-08: the register button (accent) goes on the LEFT, the
+     secondary (ghost) on the RIGHT - opposite of plain DOM order in RTL,
+     `order` only, markup unchanged. */
+  .hero__cta .btn--ghost{ order:1; }
+  .hero__cta .btn--accent{ order:2; }
+}
+.btn--accent{ background:var(--pl-accent); color:var(--pl-accent-fg); border-color:transparent; box-shadow:var(--shadow-pl-md); }
+.btn--accent:hover{ background:var(--pl-accent-hover); }
+.btn--accent svg{ color:var(--pl-accent-fg); width:1em; height:1em; }
+
+/* Sold-out/closed CTA — visually present, never clickable. Used on a past
+   cohort's strip once registration is closed (2026-08-31). */
+.btn--disabled {
+  background: var(--pl-border-strong); color: var(--pl-fg-secondary);
+  box-shadow: none; cursor: not-allowed; pointer-events: none; opacity: 0.7;
+}
+.btn--disabled:hover { background: var(--pl-border-strong); }
+
+
+/* ---- SESSION strips — FLAT full-width bands like the site's other sections,
+   flush below the hero (a hint peeks above the fold). NOT floating/rounded cards.
+   Same structure: badge + when/where(/price) columns (hairline dividers) + CTA.
+   Content is CENTERED as one balanced group so it never scatters. Two stacked
+   instances since 2026-08-31: current cohort (closed, .session-strip--closed)
+   + cohort #2 (active, price column shown — see .btn--disabled below). */
+.session-strip-band {
+  background: color-mix(in srgb, var(--pl-accent) 6%, var(--pl-bg));
+  border-block: 1px solid var(--pl-border);
+}
+.session-strip {
+  display: flex; align-items: center; justify-content: center; flex-wrap: nowrap;
+  gap: clamp(1.25rem, 3vw, 2.75rem);
+  padding-block: clamp(1.35rem, 2.6vw, 1.85rem);
+}
+.ss-badge {
+  flex: none; width: 210px; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  background: color-mix(in srgb, var(--pl-accent) 13%, transparent);
+  color: var(--pl-accent); font-weight: 700; font-size: var(--text-sm);
+  padding: 0.3rem 0.85rem; border-radius: var(--radius-full); white-space: nowrap;
+}
+.ss-badge svg { width: 15px; height: 15px; }
+
+/* Fixed per-column widths (2026-09-07, Ofir): each .ss-col/.ss-badge used to
+   hug its own row's content, so the two stacked strips - different badge
+   text, different dates - never lined up column-to-column; it read as two
+   unrelated rows, not a table. Every cell in the same column is now the
+   same width regardless of its own text, so both rows' badge/when/where/cta
+   boundaries land at the same x position - table behavior without table
+   markup. Reset to auto on the <820px stack (below), where rows go vertical
+   and a fixed width would just overflow a narrow phone. */
+.ss-col { flex: none; width: 200px; display: flex; flex-direction: column; gap: 0.35rem; }
+/* "מתי"/"When" column's second line ("17:30-20:30, מפגש יחיד, 3 שעות" /
+   "17:30-20:30, One session, 3 hours") is wider than the shared 200px
+   column, so it overflowed into "איפה"/"Where" next to it (Ofir,
+   2026-09-08, screenshot). A one-off fixed px (240px) fixed Hebrew but
+   not English, which needs ~263px in Inter - Ofir asked for the column
+   to size itself to its own content instead of another guessed number.
+   max-content does that per language automatically; safe for row-to-row
+   alignment between the two stacked session strips because that second
+   line is byte-identical copy in both rows, so both naturally resolve
+   to the same width. Other two columns stay fixed at 200px, which is
+   fine per Ofir - columns may differ in width from each other, they
+   just need to fit their own content without spilling into the next. */
+.ss-col--when { width: max-content; }
+.ss-label { font-size: var(--text-sm); font-weight: 600; color: var(--pl-fg-secondary); }
+.ss-val { display: flex; flex-direction: column; gap: 0.12rem; line-height: 1.3; }
+.ss-val strong { font-weight: 700; font-size: var(--text-body-lg); color: var(--pl-fg); white-space: nowrap; }
+.ss-val span { font-weight: 600; font-size: var(--text-sm); color: var(--pl-fg-body); white-space: nowrap; }
+.ss-div { width: 1px; background: var(--pl-border); align-self: stretch; flex: none; transform: translateZ(0); }
+.ss-price { display: flex; align-items: baseline; gap: 0.3rem; }
+.ss-price strong { font-weight: 700; font-size: var(--text-body-lg); color: var(--pl-fg); }
+.ss-price span { font-weight: 600; font-size: var(--text-sm); color: var(--pl-fg-body); }
+
+/* Full-bleed rule between the two stacked strips — breaks out of `.wrap`'s
+   max-width to span the whole viewport, not just the centered content column. */
+.ss-divider-full { width: 100vw; margin-inline-start: calc(50% - 50vw); border-top: 1px solid var(--pl-border); }
+
+.ss-col--cta { align-items: center; justify-content: center; gap: 0.55rem; }
+.ss-note { font-size: var(--text-sm); font-weight: 500; color: var(--pl-fg-secondary); text-align: center; }
+.session-strip--closed { opacity: 0.82; }
+
+@media (max-width: 820px) {
+  .session-strip { flex-direction: column; align-items: center; gap: 1.1rem; text-align: center; }
+  .ss-badge { align-self: center; width: auto; }
+  .ss-col { align-items: center; width: auto; }
+  .ss-val { align-items: center; }
+  .ss-div { align-self: center; width: 33%; height: 1px; transform: none; }
+  .ss-col--cta { align-items: center; }
+  .ss-col--cta .btn { width: 100%; }
+}
+
+/* WhatsApp = the single primary action, in the sticky header (booking funnel removed).
+   Green WhatsApp-brand button with the logo. */
+.btn--wa-solid { background: #25D366; color: #ffffff; border-color: transparent; box-shadow: var(--shadow-pl-md); }
+.btn--wa-solid:hover { background: #1eb455; }
+/* WhatsApp glyph is PERSISTENT: one fixed size in every wa button, every
+   breakpoint, regardless of button proportion. Do not size the icon per-location. */
+.btn--wa-solid svg { color: #ffffff; width: 20px; height: 20px; }
+.ctaband .btn--wa-solid { background: #25D366; color: #ffffff; }
+.ctaband .btn--wa-solid:hover { background: #1eb455; }
+
+/* ---- TESTIMONIALS — clean, premium cards: big photo + bold high-contrast quote
+   Grid spans the full section width so the cards' outer edges line up with the
+   section title/eyebrow above (no inset). */
+.quote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.quote-card {
+  margin: 0;                              /* reset default <figure> 40px side margin */
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-xl); padding: clamp(1.9rem, 3vw, 2.5rem);
+  display: flex; flex-direction: column; gap: var(--space-5); box-shadow: var(--shadow-pl-md);
+  transition: transform 0.2s var(--ease-pl), box-shadow 0.2s var(--ease-pl);
+}
+.quote-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-pl-lg); }
+
+/* attribution header: big prominent photo + name/role */
+.quote-card__head { display: flex; align-items: center; gap: 1.1rem; }
+/* wrapper holds the (overflow-clipped) avatar + the corner LinkedIn badge,
+   which must sit OUTSIDE the avatar's clip so it isn't cut off. */
+.quote-card__avatarwrap { position: relative; width: 88px; height: 88px; flex: none; }
+.quote-card__avatar {
+  width: 88px; height: 88px; border-radius: var(--radius-full); background: var(--pl-illo-bg);
+  display: grid; place-items: center; overflow: hidden;
+  box-shadow: 0 0 0 3px var(--pl-surface), 0 0 0 5px var(--pl-accent);
+}
+.quote-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.quote-card__avatar svg { width: 40px; height: 40px; color: var(--pl-accent); }
+.quote-card__who { display: flex; flex-direction: column; gap: var(--space-1); }
+.quote-card__who strong { font-weight: 700; color: var(--pl-fg); font-size: var(--text-h3); line-height: 1.2; }
+.quote-card__who span { font-size: var(--text-sm); font-weight: 600; color: var(--pl-accent); }
+.quote-card__name { display: inline-flex; align-items: center; gap: 0.4rem; }
+.quote-card__role { display: inline-flex; align-items: center; gap: 0.4rem; }
+/* LinkedIn = corner badge on the avatar. Solid brand-blue disc, no border ring,
+   sits on the lower-inline-end arc so it reads as part of the photo. */
+.quote-card__li {
+  position: absolute; bottom: 2px; inset-inline-end: 2px;
+  width: 26px; height: 26px; border-radius: var(--radius-full);
+  display: grid; place-items: center; line-height: 0; cursor: pointer;
+  background: var(--pl-surface); color: var(--pl-fg-muted);
+  box-shadow: var(--shadow-pl-sm);
+  transition: transform 0.15s var(--ease-pl), color 0.2s var(--ease-pl);
+}
+.quote-card__li svg { width: 15px; height: 15px; }
+.quote-card__li:hover, .quote-card__li:focus-visible { transform: scale(1.08); color: var(--pl-fg); }
+
+/* the quote: softer + lighter than the attribution (medium weight, gray ink),
+   opened by a large decorative quote mark. Separated by a hairline. */
+.quote-card blockquote {
+  margin: 0; padding-top: 1.4rem; border-top: 1px solid var(--pl-border);
+  font-size: var(--text-h3); font-weight: 500; color: var(--pl-fg-secondary);
+  line-height: 1.5; letter-spacing: -0.01em;
+}
+/* big decorative quotation mark above the text (start-aligned → right in RTL) */
+.quote-card blockquote::before {
+  content: "\201C";
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 3.25rem; line-height: 0.4; height: 0.6em;
+  color: var(--pl-accent); opacity: 0.35;
+}
+@media (max-width: 700px) { .quote-grid { grid-template-columns: 1fr; } }
+
+/* ---- A DAY IN THE LIFE OF A GRADUATE ------------------------------------
+   Placement: directly below the last testimonial, on the SAME alt band —
+   padding-top:0 so the two sections read as one continuous stripe.
+
+   THE PHOTOGRAPH IS NEVER CROPPED. It is a 3:2 frame (1536x1024) and it ships
+   at 3:2 at every width, mobile and desktop. The earlier centred 4:5 desktop
+   crop is gone: it cut the man out of frame and halved two puppets.
+
+   WHY THE SPLIT STARTS AT 1180 AND NOT 980. A 3:2 photo in a half column is
+   short; a three-paragraph text column is tall. Measured at 980px the frame
+   renders ~345px against a ~677px text column — a 2:1 mismatch that no column
+   ratio fixes (the minimum mismatch across every ratio at that width is still
+   ~300px, because widening the text shortens it but shortens the photo too).
+   Two levers close it instead:
+     (a) the split only starts at 1180px — below that the block STACKS and ends
+         on the image, which is the composition that was approved for mobile;
+     (b) at >=1180 the container widens to --maxw-wide (1360) so the image
+         column can actually carry the 3:2 — frame ~559px against a ~666px text
+         column at 1440 (16%), vs ~230px short (35%) inside the 1120 container.
+   align-items:center, so what is left reads as a photograph with air around it. */
+.grad-section { padding-top: 0; }
+.grad-wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad-x); }
+.grad { display: grid; gap: clamp(2rem, 5vw, 3rem); align-items: center; }
+.grad__text { max-width: 62ch; }
+.grad__title { max-width: 18ch; }
+.grad__paras { margin-top: 1.25rem; display: grid; gap: 0.9rem; }   /* tight paragraph rhythm, not spaced standalone lines */
+.grad__paras p { font-size: var(--text-body-lg); line-height: 1.65; color: var(--pl-fg-body); font-weight: 500; }
+
+/* the polaroid — a real object on the page: white stock, deep bottom strip, a
+   pin through the top edge, and a small tilt so it reads as pinned up, not
+   placed. One-off decorative treatment, scoped to this section. */
+.grad__media { display: flex; justify-content: center; }
+.grad__frame {
+  position: relative; margin: 0;
+  width: 100%; max-width: 640px;
+  background: var(--pl-surface);
+  /* the stock scales WITH the print, so the deep bottom strip stays the same
+     share of the photo at 320px as it is at 1440px (measured 9.4% of frame
+     width at both ends) instead of swallowing a phone-sized polaroid. */
+  padding: clamp(9px, 2.2%, 16px) clamp(9px, 2.2%, 16px) clamp(30px, 8.5%, 60px);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-pl-lg);
+  transform: rotate(-1.4deg);
+}
+.grad__frame img {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 3 / 2; object-fit: cover;      /* source IS 3:2 — nothing is cropped */
+  border-radius: 0; background: var(--pl-illo-bg);   /* a print has square corners; the stock around it carries the 4px */
+}
+.grad__pin {
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 20px; border-radius: var(--radius-full);
+  background:
+    radial-gradient(circle at 34% 30%, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0) 48%),
+    var(--pl-accent);
+  box-shadow: 0 3px 7px -1px rgb(10 10 10 / 0.40), 0 10px 12px -6px rgb(10 10 10 / 0.30);
+}
+
+/* SPLIT — text column, then the photograph. In RTL the grid flips on its own
+   (logical columns), so the text sits right and the polaroid left. */
+@media (min-width: 1180px) {
+  .grad-wrap { max-width: var(--maxw-wide); }
+  .grad { grid-template-columns: minmax(0, 27rem) minmax(0, 1fr); gap: 4rem; }
+  .grad__text { max-width: none; }
+  .grad__media { justify-content: center; }
+  .grad__frame { max-width: 860px; }
+}
+
+@media (prefers-reduced-motion: reduce) { .grad__frame { transform: none; } }
+
+/* "who it's not for" quiet line under the three tiles */
+.who__not { margin-top: 1.75rem; text-align: center; max-width: 62ch; margin-inline: auto;
+  color: var(--pl-fg-secondary); font-weight: 500; font-size: var(--text-sm); }
+
+/* ---- Footer links (Privacy / Terms / Contact) ---------------------------- */
+.footer__links { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; }
+.footer__links a { color: var(--pl-fg); font-weight: 600; text-decoration: none; font-size: var(--text-sm); }
+.footer__links a:hover { color: var(--pl-accent); }
+/* MOBILE: stack the footer blocks one above the other, centered. */
+@media (max-width: 620px) {
+  .footer__in { flex-direction: column; align-items: center; text-align: center; gap: 1.25rem; }
+  .footer__links { justify-content: center; }
+}
+
+/* ---- Sub-pages (prep / legal) -------------------------------------------- */
+.page { min-height: 60vh; }
+.prep__h { font-size: var(--text-h2); margin-bottom: var(--space-4); }
+
+/* Full-width brand banner for the gated #/prep workspace's page title — sits
+   flush under the fixed nav (no gap) so it doesn't read as disconnected from
+   the tab bar below it. Full-bleed math is the SAME mechanism as
+   .ss-divider-full (Ofir, 2026-09-02). The gradient is a genuinely new
+   composition — flagged to the Design System Lead to decide canonical vs
+   one-off — but every stop is an EXISTING token: the crew palette (already
+   documented as "playful accents") left-to-right into the accent purple, so
+   it reads as a felt-puppet-brand tile, not a flat generic tint. Title copy
+   is unchanged (C.hero.title) — presentation only. */
+.prep-banner {
+  width: 100vw; margin-inline-start: calc(50% - 50vw);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--pl-crew-yellow) 16%, var(--pl-bg)) 0%,
+    color-mix(in srgb, var(--pl-crew-orange) 16%, var(--pl-bg)) 30%,
+    color-mix(in srgb, var(--pl-accent) 16%, var(--pl-bg)) 55%,
+    color-mix(in srgb, var(--pl-crew-teal) 16%, var(--pl-bg)) 80%,
+    color-mix(in srgb, var(--pl-crew-purple) 16%, var(--pl-bg)) 100%);
+  border-bottom: 1px solid var(--pl-border);
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  text-align: center;
+}
+.prep-banner__title { font-size: var(--text-h1); max-width: 26ch; margin: 0 auto; color: var(--pl-fg); }
+
+/* Session facts — label/value rows split by hairlines, one bounded panel */
+.facts { display: grid; gap: 0; margin: 0; border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); overflow: hidden; background: var(--pl-surface); box-shadow: var(--shadow-pl-sm); }
+.facts__row { display: grid; grid-template-columns: 11rem 1fr; gap: var(--space-4);
+  padding: 1rem 1.4rem; border-top: 1px solid var(--pl-border); }
+.facts__row:first-child { border-top: 0; }
+.facts dt { font-weight: 700; color: var(--pl-fg); margin: 0; }
+.facts dd { margin: 0; color: var(--pl-fg-body); font-weight: 500; }
+@media (max-width: 560px) { .facts__row { grid-template-columns: 1fr; gap: 0.2rem; } }
+
+/* Setup checklist — numbered cards */
+.prep-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+.prep-step { display: flex; gap: var(--space-4); align-items: flex-start;
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); padding: 1.4rem 1.5rem; box-shadow: var(--shadow-pl-sm); }
+.prep-step__num { flex: none; width: 2rem; height: 2rem; border-radius: var(--radius-full);
+  display: grid; place-items: center; font-weight: 700; font-size: var(--text-sm);
+  background: var(--pl-illo-bg); color: var(--pl-accent); }
+.prep-step h3 { font-size: var(--text-h3); margin-bottom: 0.3rem; }
+.prep-step p { color: var(--pl-fg-body); font-weight: 500; }
+
+/* Note callout (echoes the login note styling) */
+.prep-note { display: flex; gap: 0.7rem; align-items: flex-start;
+  background: var(--pl-bg-alt); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); padding: 1.1rem 1.3rem;
+  color: var(--pl-fg-body); font-weight: 500; font-size: var(--text-sm); }
+.prep-note svg { flex: none; width: 20px; height: 20px; color: var(--pl-accent); margin-top: 1px; }
+
+/* Legal pages (Privacy / Terms) */
+.legal { margin-top: 2.25rem; display: grid; gap: 1.75rem; }
+.legal__item h2 { font-size: var(--text-h3); margin-bottom: var(--space-2); }
+.legal__item p { color: var(--pl-fg-body); font-weight: 500; }
+.legal__updated { margin-top: 2.5rem; color: var(--pl-fg-muted); font-weight: 500; font-size: var(--text-sm); }
+
+/* =============================================================================
+   GATED WORKSHOP VAULT (#/prep) — migrated workshop content, current DS.
+   Rendered from window.WORKSHOP_CONTENT (content.js). Teaching copy is
+   bilingual; the .vault <main> takes dir from the toggle (rtl HE / ltr EN).
+   Layout uses flex/grid + logical properties, so it flows in both directions.
+   The copyable prompt body (.prompt__text) is forced dir="ltr" inline so the
+   English prompt reads correctly inside an RTL page. All values reference
+   existing tokens — no inline hex.
+   ========================================================================== */
+.vault .mark { color: var(--pl-accent); }
+
+/* Card additions: kicker (accent caption), tag (pill), feature variant.
+   Base .card / .card__ico / .card h3 / .card p are reused as-is. */
+.card__kicker {
+  display: block; font-size: var(--text-caption); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.14em; color: var(--pl-accent);
+  margin-bottom: 0.4rem;
+}
+/* Kicker + an optional info trigger for a short caveat (Ofir, 2026-09-06: the
+   kit/recording disclaimer text made the cards too tall and "not interesting").
+   Reuses the light tooltip (DSL, 2026-09-06) instead of a visible paragraph —
+   RUNG 1 reuse, no new component. */
+.card__kicker-row { display: flex; align-items: center; gap: var(--space-2); margin-bottom: 0.4rem; }
+.card__kicker-row .card__kicker { margin-bottom: 0; }
+.card__note-btn { display: inline-flex; padding: 0; border: 0; background: none; width: 16px; height: 16px; color: var(--pl-fg-muted); }
+.card__note-btn svg { width: 100%; height: 100%; }
+.card__note-btn:hover, .card__note-btn:focus-visible { color: var(--pl-fg-secondary); }
+
+.card__tag {
+  display: inline-flex; align-items: center; gap: var(--space-2); width: fit-content;
+  margin-bottom: var(--space-3); padding: 0.3rem 0.75rem; border-radius: var(--radius-full);
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  font-size: var(--text-caption); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--pl-accent);
+}
+.card__tag::before {
+  content: ""; width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--pl-accent);
+}
+.card--feature { background: var(--pl-illo-bg); border-color: var(--pl-border-strong); }
+
+/* --anchored + __foot: a card whose LAST block is an action (a button row) or a
+   row of badges. Cards in a .grid stretch to the tallest sibling, so a card with
+   shorter body copy left its button floating mid-card with dead space beneath
+   it, and a row of three cards put its badges on three different baselines.
+   Making the card a column lets __foot absorb the slack (margin-top:auto), so
+   every card in the row lands its action on ONE baseline however the copy wraps.
+   Tokens only, no new values. Used by the kit cards and the crew cards. */
+.card--anchored { display: flex; flex-direction: column; }
+.card--anchored .card__foot { margin-top: auto; padding-top: var(--space-4); }
+/* The kit media band lives INSIDE the foot, not above it. The two kit cards
+   carry different amounts of body copy, so anchoring only the button left the
+   deck card's photograph floating with ~84px of dead space under it. With the
+   band in the foot, the photo and the folder figure land on one baseline too,
+   and the buttons stay on theirs. */
+.card__foot .card__media { margin-top: 0; margin-bottom: var(--space-4); }
+
+/* A row of small metadata badges at the foot of a card (the files each agent
+   carries). Same pill values this site already uses for a metadata tag on
+   .pchecklist__tag — a LABEL, not a control. Deliberately NOT .pcrumb__chip:
+   that one is a breadcrumb step (radius-sm, body colour, arrows between) and
+   four of them sitting on a white card read as four buttons.
+   NO dir="ltr" on the row: these are single Latin words, bidi orders them
+   correctly on its own, and forcing LTR pinned the row to the LEFT edge inside
+   an RTL card while every other element in it hugged the right.
+   gap is --space-1, not --space-2: four badges have to clear a 275px card
+   column at 1440 (the .grid--3 track) without orphaning one onto its own line. */
+.card__badges { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.card__badge {
+  padding: 0.1rem 0.5rem; border-radius: var(--radius-full);
+  border: 1px solid var(--pl-border); background: var(--pl-surface);
+  font-size: var(--text-caption); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--pl-accent); white-space: nowrap;
+}
+
+/* __media: a 16:9 band inside a card, above the foot. The site already frames
+   media inside a card (.proof__shot, .tilecard__illo, .agentcard__illo) - this
+   is the same idea sized by RATIO instead of a fixed height, so the two kit
+   tiles read as a matched pair whatever they hold: one the deck's slide 1, the
+   other a figure for the file. Tokens only, no new values.
+
+   THE RATIO IS SET BY ::before, NOT by `aspect-ratio`, and that is load-bearing:
+   a .card--anchored card is a column flex container, so this box is a flex item
+   whose main size comes from its content, and `aspect-ratio` was measured being
+   ignored outright (a 457px-wide band came back 82px tall, ratio 5.6). The
+   padding-top percentage resolves against the box's own WIDTH in every layout
+   mode, so it holds inside flex. Children are absolutely positioned into it. */
+.card__media {
+  position: relative; width: 100%; margin-top: var(--space-4); overflow: hidden;
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md);
+  background: var(--pl-bg);
+}
+/* One consistent poster for a card with no real photo/screenshot: 16:9, an
+   icon centered on --pl-illo-bg. Retired .kitfile/.card__media--figure (the
+   six-pill "file tree" mock) in favor of this — same box for kit and
+   recording now, only the icon glyph differs (k.posterIcon). */
+.card__media--poster { aspect-ratio: 16 / 9; display: grid; place-items: center; background: var(--pl-illo-bg); }
+/* A real photo behind the play badge (recording tile): the badge needs its
+   own centering here, since the generic `.card__media > *{inset:0}` rule
+   would otherwise pin its fixed 56x56 box to the top-left corner once an
+   <img> sibling is also stretching the same box. */
+.card__media--photo-poster .card__media-play { inset: auto; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.card__media-play {
+  width: 56px; height: 56px; border-radius: var(--radius-full); display: grid; place-items: center;
+  background: var(--pl-surface); box-shadow: var(--shadow-pl-md); color: var(--pl-accent);
+}
+.card__media-play svg { width: 22px; height: 22px; }
+
+.card__media::before { content: ""; display: block; padding-top: 56.25%; }  /* 16:9 */
+.card__media > * { position: absolute; inset: 0; }
+.card__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Teammates list inside the "build the team" card */
+.teammates { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
+.teammates__name { font-weight: 700; color: var(--pl-fg); }
+.teammates__charter { font-size: var(--text-sm); font-weight: 700; color: var(--pl-accent); }
+.teammates li p { margin-top: 0.1rem; font-size: var(--text-sm); color: var(--pl-fg-body); font-weight: 500; }
+
+/* Two-column technical block. Was "stages list beside the narrowing funnel";
+   since 2026-08-27 it carries the agent anatomy as two groups of the same
+   numbered stage list. .tech__figure and .funnel were removed with the funnel. */
+.tech { display: grid; gap: clamp(2rem, 4vw, 3.5rem); grid-template-columns: 1fr; align-items: center; }
+@media (min-width: 860px) { .tech { grid-template-columns: 1fr 1fr; } }
+/* Two content columns of UNEQUAL length (4 items vs 2). Centring them dropped
+   the second group's heading ~100px below the first; start-aligning puts both
+   headings on one baseline. Only align-items changes - same grid, same tokens. */
+.tech--groups { align-items: start; }
+.tech__group { display: grid; }
+.stage-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.75rem; }
+.stage { display: flex; gap: var(--space-4); align-items: flex-start; }
+.stage__num {
+  flex: none; width: 2rem; height: 2rem; border-radius: var(--radius-full); display: grid; place-items: center;
+  font-size: var(--text-sm); font-weight: 700; background: var(--pl-accent); color: var(--pl-accent-fg);
+}
+.stage h3 { font-size: var(--text-h3); margin-bottom: var(--space-1); }
+.stage p { color: var(--pl-fg-body); font-weight: 500; }
+.tech__closing {
+  margin: clamp(2.5rem, 5vw, 3.5rem) auto 0; max-width: 42rem; text-align: center;
+  font-size: var(--text-body-lg); font-weight: 700; color: var(--pl-fg); line-height: 1.5;
+}
+
+/* The shared-brain section (M3): intro body + containment diagram */
+.brain { display: grid; gap: clamp(1.75rem, 4vw, 2.75rem); }
+.brain__body {
+  max-width: 46rem; margin-inline: auto; text-align: center;
+  color: var(--pl-fg-body); font-weight: 500; font-size: var(--text-body); line-height: 1.6;
+}
+.brain__figure { display: flex; justify-content: center; }
+.brainmap {
+  width: 100%; max-width: 60rem;
+  padding: clamp(1.4rem, 3vw, 2rem);
+}
+/* Header = the shared-brain hub, flanked by rules / roles — three pills of
+   the IDENTICAL anatomy (.brainmap__coord, all --primary: same height,
+   border, tint, font). Grid, not flex: 1fr/auto/1fr keeps the hub's column
+   geometrically centered regardless of the two side pills' text length, so
+   the trunk line (::after, left:50%) always lands under the hub. The
+   first/last-child rule pulls each side pill in toward the hub (logical
+   end/start, so it's correct in both RTL and LTR) instead of drifting to
+   the row's outer edge — Ofir, 2026-09-02: wanted them "much closer,"
+   same style/height as the hub, line touching it with nothing between. */
+.brainmap__hd {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  gap: 0.6rem;
+  padding-bottom: clamp(1.5rem, 3.5vw, 2.25rem);
+  position: relative;
+}
+.brainmap__hd > *:first-child { justify-self: end; }
+.brainmap__hd > *:last-child { justify-self: start; }
+/* Trunk line: brain node down to the bus line / spine below */
+.brainmap__hd::after {
+  content: ""; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: 2px; height: clamp(1.5rem, 3.5vw, 2.25rem); background: var(--pl-border-strong);
+}
+.brainmap__coord {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  border: 1px solid var(--pl-border-strong); border-radius: var(--radius-full);
+  padding: 0.5rem 1rem; background: var(--pl-bg-alt);
+  font-size: var(--text-sm); font-weight: 700; color: var(--pl-fg);
+}
+.brainmap__coord svg { width: 1.05rem; height: 1.05rem; flex: none; }
+.brainmap__coord--primary {
+  background: color-mix(in srgb, var(--pl-accent) 12%, var(--pl-surface));
+  border-color: var(--pl-accent);
+}
+.brainmap__coord--primary svg { color: var(--pl-accent); }
+@media (max-width: 560px) {
+  /* Side pills wrap under the hub on very narrow phones rather than
+     squeezing three pills into one row. */
+  .brainmap__hd { grid-template-columns: 1fr; justify-items: center; gap: var(--space-2); }
+  .brainmap__hd > *:first-child, .brainmap__hd > *:last-child { justify-self: center; order: 2; }
+}
+/* The agents, connected to the shared brain via a bus (desktop) or spine (mobile) */
+.brainmap__agents {
+  --bm-gap: clamp(1rem, 2.5vw, 1.4rem);
+  --bm-col: calc((100% - 2 * var(--bm-gap)) / 3);
+  position: relative;
+  display: grid; grid-template-columns: 1fr; gap: var(--bm-gap);
+  margin-top: clamp(1.5rem, 3.5vw, 2.25rem);
+}
+@media (min-width: 720px) {
+  .brainmap__agents { grid-template-columns: repeat(3, 1fr); }
+  /* Bus line: spans exactly from the center of the first card to the center of the last */
+  .brainmap__agents::before {
+    content: ""; position: absolute;
+    top: calc(-1 * clamp(1.5rem, 3.5vw, 2.25rem));
+    left: calc(var(--bm-col) / 2); right: calc(var(--bm-col) / 2);
+    height: 2px; background: var(--pl-border-strong);
+  }
+}
+@media (max-width: 719.98px) {
+  /* Spine: one continuous line running behind the stacked cards */
+  .brainmap__agents::after {
+    content: ""; position: absolute; z-index: 0;
+    top: calc(-1 * clamp(1.5rem, 3.5vw, 2.25rem)); bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 2px; background: var(--pl-border-strong);
+  }
+}
+.brainmap__agent {
+  position: relative; z-index: 1; background: var(--pl-illo-bg);
+  border: 1px solid var(--pl-border); border-radius: var(--radius-lg);
+  padding: 1.1rem 1rem 1.15rem; text-align: center;
+}
+/* Tick + dot linking each agent up to the bus/spine above */
+.brainmap__agent::before {
+  content: ""; position: absolute; top: calc(-1 * clamp(1.5rem, 3.5vw, 2.25rem));
+  left: 50%; transform: translateX(-50%);
+  width: 2px; height: clamp(1.5rem, 3.5vw, 2.25rem); background: var(--pl-border-strong);
+}
+.brainmap__agent::after {
+  content: ""; position: absolute; top: calc(-1 * clamp(1.5rem, 3.5vw, 2.25rem) - 3px);
+  left: 50%; transform: translateX(-50%);
+  width: 7px; height: 7px; border-radius: var(--radius-full); background: var(--pl-accent);
+}
+.brainmap__agent-name {
+  display: block; font-size: var(--text-sm); font-weight: 700; color: var(--pl-fg);
+  margin-bottom: 0.8rem;
+}
+.brainmap__attrs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.brainmap__attr {
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md);
+  background: var(--pl-surface); padding: 0.5rem 0.4rem;
+  font-size: var(--text-caption); font-weight: 600; color: var(--pl-fg-body);
+}
+
+/* .tool__* lived here until 2026-08-27. The Claude-vs-vibe-coding comparison
+   section it styled was removed: the deck has no comparison slide, so the page
+   was teaching a topic the workshop does not cover. Nothing references these
+   anymore (checked app.js and stories/), so they are gone rather than left to rot. */
+
+/* The plan — collapsible numbered steps */
+.plan { display: grid; gap: var(--space-4); }
+.pstep {
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-pl-sm); overflow: hidden;
+}
+.pstep[open] { border-color: var(--pl-border-strong); }
+.pstep__head {
+  list-style: none; cursor: pointer; display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 1.25rem; padding: 1.5rem 1.75rem;
+}
+.pstep__head::-webkit-details-marker { display: none; }
+.pstep__num { font-size: var(--text-h1); font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--pl-accent); min-width: 2.25rem; }
+.pstep__title { font-size: var(--text-h3); font-weight: 700; color: var(--pl-fg); }
+.pstep__chev { display: inline-grid; place-items: center; color: var(--pl-fg-secondary); }
+.pstep__chev .chevron { transition: transform 0.2s var(--ease-pl); }
+.pstep[open] .pstep__chev .chevron { transform: rotate(180deg); }
+.pstep__body { padding: 0 1.75rem 1.75rem; }
+.pstep__lead { color: var(--pl-fg-body); font-weight: 500; }
+/* Inline setup link inside a step body. bidi-isolated (with dir="ltr" in markup)
+   so LTR URLs and the Windows Settings breadcrumb keep correct order in RTL Hebrew. */
+.plink { color: var(--pl-accent); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; unicode-bidi: isolate; }
+.plink:hover { color: var(--pl-accent-hover); }
+.ltr-iso { unicode-bidi: isolate; }
+
+/* Optional aside inside a step */
+.pnote {
+  display: flex; gap: 0.7rem; align-items: flex-start; margin-top: var(--space-4);
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md); padding: 0.9rem 1.05rem;
+}
+.pnote__dot { flex: none; width: 6px; height: 6px; margin-top: 0.55rem; border-radius: var(--radius-full); background: var(--pl-accent); }
+.pnote p { font-size: var(--text-sm); color: var(--pl-fg-body); font-weight: 500; line-height: 1.5; }
+
+/* Setup checklist inside a step */
+.pchecklist { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; gap: 0.7rem; }
+.pchecklist__item {
+  display: flex; gap: 0.85rem; align-items: flex-start;
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md); padding: 0.9rem 1.05rem;
+}
+.pchecklist__dot { flex: none; width: 6px; height: 6px; margin-top: 0.6rem; border-radius: var(--radius-full); background: var(--pl-accent); }
+.pchecklist__top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-bottom: 0.15rem; }
+.pchecklist__name { font-weight: 700; color: var(--pl-fg); }
+.pchecklist__tag {
+  padding: 0.1rem 0.5rem; border-radius: var(--radius-full); border: 1px solid var(--pl-border);
+  font-size: var(--text-caption); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--pl-accent);
+}
+.pchecklist__note { font-size: var(--text-sm); color: var(--pl-fg-body); font-weight: 500; line-height: 1.5; }
+
+/* Nested sub-steps inside a grouped checklist row (e.g. the Windows-only item) */
+.psub { list-style: none; margin: 0.85rem 0 0; padding: 0; display: grid; gap: var(--space-3);
+  border-inline-start: 2px solid color-mix(in srgb, var(--pl-accent) 22%, transparent); padding-inline-start: 0.9rem; }
+.psub__item { display: grid; gap: 0.4rem; }
+.psub__name { font-weight: 700; color: var(--pl-fg); font-size: var(--text-sm); }
+.psub__note { font-size: var(--text-sm); color: var(--pl-fg-body); font-weight: 500; line-height: 1.5; }
+
+/* Fixed left-to-right breadcrumb of chips (Windows Settings path). dir="ltr" in
+   markup keeps the order stable regardless of surrounding Hebrew RTL. */
+.pcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin: 0.15rem 0; }
+.pcrumb__chip {
+  padding: 0.2rem 0.55rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--pl-border); background: var(--pl-surface);
+  font-size: var(--text-caption); font-weight: 700; color: var(--pl-fg-body); white-space: nowrap;
+}
+.pcrumb__chip--target {
+  border-color: color-mix(in srgb, var(--pl-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--pl-accent) 12%, transparent); color: var(--pl-accent);
+}
+.pcrumb__arrow { color: var(--pl-accent); font-weight: 700; }
+
+/* Copyable prompt cards */
+.prompts { display: grid; gap: var(--space-4); margin-top: 1.25rem; }
+.prompt {
+  border: 1px solid var(--pl-border); border-radius: var(--radius-md);
+  background: var(--pl-surface); overflow: hidden;
+}
+.prompt__head { border-bottom: 1px solid var(--pl-border); padding: 1rem 1.15rem; }
+.prompt__label {
+  display: block;
+  font-size: var(--text-caption); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--pl-fg-secondary);
+}
+.prompt__intro { margin-top: 0.55rem; font-size: var(--text-sm); color: var(--pl-fg-secondary); font-weight: 500; line-height: 1.55; }
+
+/* The prompt frame and its own Copy control. The button lives INSIDE the frame
+   (not the head) and is pinned to the top-right corner of the FRAME, not of
+   the scrolling <pre> - so it stays put while a long prompt scrolls under it. .prompt__text reserves a matching padding lane on that side, so text is
+   pushed clear of the button instead of running beneath it. */
+.prompt__body { position: relative; }
+.prompt__text {
+  margin: 0; max-height: 18rem; overflow: auto; white-space: pre-wrap; word-break: break-word;
+  padding: 1.15rem; padding-inline-end: var(--space-7);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--text-sm); line-height: 1.6; color: var(--pl-fg-body); background: var(--pl-bg);
+}
+/* Border-less by default; the hover/focus background is the only affordance.
+   Same ghost-control pattern as .langswitch__item, on the frame's --pl-bg
+   surface, so the hover fill is --pl-bg-alt. */
+.prompt__copy {
+  /* PHYSICAL `right`, deliberately, not inset-inline-end: the frame is always
+     LTR content (dir="ltr" on the <pre>), so its reserved padding lane is on
+     the physical right in BOTH languages. A logical inset would resolve off
+     the RTL page direction and land the button on the opposite side from the
+     lane it is supposed to sit in. */
+  position: absolute; top: 0.85rem; right: 0.65rem; z-index: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: var(--ctl-xs); height: var(--ctl-xs);
+  padding: 0; border: 0; background: transparent; border-radius: var(--radius-sm);
+  color: var(--pl-fg-secondary); cursor: pointer;
+  transition: background-color 0.15s var(--ease-pl), color 0.15s var(--ease-pl);
+}
+.prompt__copy:hover, .prompt__copy:focus-visible { background: var(--pl-bg-alt); color: var(--pl-fg); }
+.prompt__copy svg { width: var(--icon-sm); height: var(--icon-sm); }
+.prompt__copy.is-copied { background: transparent; color: var(--pl-accent); }
+
+/* Mobile: relax the plan-step header so the big number never crowds the title */
+@media (max-width: 560px) {
+  .pstep__head { gap: 0.85rem; padding: 1.25rem 1.25rem; }
+  .pstep__num { font-size: var(--text-h2); min-width: 1.75rem; }
+  .pstep__body { padding: 0 1.25rem 1.25rem; }
+}
+
+/* reveal on scroll */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s var(--ease-pl), transform 0.6s var(--ease-pl); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+
+/* ---- #/fleet — the Fleet Blueprint page (2026-09-05) ------------------------
+   Composed of existing parts, on purpose: .moment-card + the .login__* header
+   + the register modal's form recipe inline (.reg__form/.field/.input/
+   .reg__note/.reg__error/.reg__submit), the home crew band (.team__crew +
+   .agentcard), .card/.grid, .pchecklist, .pnote, .prep-note, .deliv, .ctaband
+   and the cohort #2 .session-strip. Below: scoping rules (no new visual
+   language), two EXTENDS (.field__hint, .chip--choice) and one NEW primitive
+   (.skel). DSL ruled 2026-09-05: all three ENTERED the system (story:
+   stories/components/FleetControls.stories.js); the .fleet-* glue below stays
+   product code. DSL consistency fixes applied same day (aria-checked only,
+   dead .fleet-nav/.fleet-choices rules removed, .skel on tokens, .ss-badge
+   for both pills in .fleet-spec__head, .section-lead q made global). */
+.fleet-card .eyebrow { justify-content: center; }
+.fleet-card .cta-row { justify-content: center; margin-top: var(--space-5); }
+.fleet-card .login__note { margin-top: var(--space-4); }
+.fleet-card .ss-note { margin-top: var(--space-3); }
+/* Question / gate forms inside the card: same start-aligned form rhythm as
+   the register modal; the step buttons sit back-at-start, next-at-end. */
+.fleet-card .reg__form { margin-top: var(--space-5); }
+.fleet-card .reg__form .cta-row { margin-top: var(--space-2); }
+.fleet-nav { flex-wrap: wrap-reverse; } /* at 390 Next stacks ABOVE Back; centered like .noacct */
+
+/* EXTEND .field — a quiet meta line under a control (the 0/300 counter).
+   Caption size, secondary ink, sits at the reading-end edge. */
+.field__hint { font-size: var(--text-caption); font-weight: 500; color: var(--pl-fg-secondary); text-align: end; }
+[data-fleet-count].is-max { color: var(--pl-stage-dropped); }
+
+/* #/fleet question field, mic redesign (Ofir, 2026-09-06 - live): the standalone
+   labeled chip ABOVE the textarea ("blunt, big, redundant") is gone. The mic now
+   lives in the SAME row as the character counter, below the field, sized up one
+   notch from the counter's caption size so it reads as a control, not a label.
+   Discoverability moves from a permanent text label to the light tooltip
+   (already established today) - hover/focus/tap-and-hold reveals what it does. */
+.field__hint--mic {
+  /* Ofir, 2026-09-06, live, explicit: counter at the box's physical bottom-LEFT,
+     mic at its physical bottom-RIGHT — in EITHER language. Logical RTL "start"/
+     "end" flips which side is which per page direction, which is the opposite
+     of what was asked twice; forcing this row's own `direction: ltr` (DOM order
+     counter-then-mic, matching a normal left-to-right reading of "1/300 🎤")
+     makes flex-start = physical left and flex-end = physical right unconditionally,
+     so the layout no longer depends on the page's language at all. */
+  display: flex; align-items: center; justify-content: space-between;
+  direction: ltr; gap: var(--space-2); font-size: var(--text-sm); line-height: 1;
+}
+/* Ofir, 2026-09-08 (shipped 2026-09-08 later that day, per his explicit
+   go-ahead): the state text (idle "or just talk" / listening) moves from a
+   floating [data-tooltip] into a permanent inline label, so it never needs
+   a hover/tap to discover. The icon's own physical position is unchanged -
+   this row already forces `direction:ltr` with the mic as the LAST flex
+   child (see .field__hint--mic above), so the icon stays pinned to the
+   row's physical-right edge regardless of label length; the label (first
+   child inside the button, same ltr direction) grows the button LEFTWARD
+   only. */
+.mic-btn {
+  display: flex; align-items: center; flex: none;
+  height: 28px; padding-inline: 8px 0; border: 0; border-radius: var(--radius-full);
+  color: var(--pl-fg-secondary); background: transparent;
+  font-size: var(--text-caption); font-weight: 600; white-space: nowrap;
+  transition: background-color 0.15s var(--ease-pl), color 0.15s var(--ease-pl);
+}
+.mic-btn__icon { position: relative; display: grid; place-items: center; flex: none; width: 28px; height: 28px; }
+.mic-btn__icon svg { width: 20px; height: 20px; }
+.mic-btn:hover, .mic-btn:focus-visible { background: var(--pl-bg-alt); color: var(--pl-fg); }
+.mic-btn[aria-pressed="true"] { color: var(--pl-accent); }
+.mic-btn .dot {
+  position: absolute; top: 2px; inset-inline-end: 2px; width: 7px; height: 7px;
+  border-radius: var(--radius-full); background: var(--pl-accent); display: none;
+}
+.mic-btn[aria-pressed="true"] .dot { display: block; animation: skel 1.4s var(--ease-pl) infinite; }
+@media (prefers-reduced-motion: reduce) { .mic-btn[aria-pressed="true"] .dot { animation: none; } }
+
+/* EXTEND .chip — a selectable choice (single-select radio, aria-checked).
+   Sits on the control ladder (sm = 40px). Selected state = the system's
+   accent-tint pill recipe already used by .pcrumb__chip--target and
+   .agentcard__tag; focus ring = .input's. */
+.chip--choice, .chip--toggle {
+  font-family: inherit; height: var(--ctl-sm); min-width: var(--ctl-sm);
+  padding-inline: var(--space-4);
+  transition: border-color 0.2s var(--ease-pl), background-color 0.2s var(--ease-pl), color 0.2s var(--ease-pl);
+}
+.chip--choice:hover, .chip--toggle:hover { border-color: var(--pl-fg); }
+.chip--choice:focus-visible, .chip--toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-accent) 22%, transparent); }
+.chip--choice[aria-checked="true"] {
+  background: color-mix(in srgb, var(--pl-accent) 12%, var(--pl-surface));
+  border-color: var(--pl-accent); color: var(--pl-accent);
+}
+
+/* NEW .skel — a loading skeleton line, shaped like the content it waits for.
+   The site had no loading primitive besides the roster's dashed text box.
+   Opacity pulse only (no gradient shimmer), reduced-motion aware. */
+.skel {
+  display: block; height: 0.9em; margin-bottom: var(--space-3);
+  border-radius: var(--radius-sm); background: var(--pl-bg-alt);
+  animation: skel 1.4s var(--ease-pl) infinite;
+}
+.skel--tag { width: 30%; height: var(--space-5); border-radius: var(--radius-full); margin-bottom: var(--space-4); }
+.skel--h { width: 60%; height: var(--text-h3); margin-bottom: var(--space-4); }
+.skel--short { width: 45%; margin-bottom: 0; }
+@keyframes skel { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+.fleet-loading__line { text-align: center; margin-bottom: var(--space-6); }
+
+/* ---- Result page v9 (Ofir, 2026-09-07, seventh pass, section 1 only):
+   every agent card is now a full-width row, stacked one under another
+   within its cluster - NEVER side-by-side, at any width, mobile or
+   desktop. The previous wrap-into-a-row tile grid is gone; this is a
+   plain vertical list of big, symmetric rows (Ofir: "not small scattered
+   tiles"). Card padding/avatar/type sized up for a premium feel, while
+   the gaps BETWEEN rows/clusters are tight, so density comes from less
+   whitespace, not smaller cards. RTL: every text node here is a plain
+   block/inline element with no text-align override, so it inherits
+   right-aligned from the page's own dir="rtl". */
+.fleet-team-board {
+  display: flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-4);
+}
+.fleet-team-label {
+  font-size: var(--text-caption); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--pl-fg-secondary); margin-bottom: var(--space-2);
+}
+.fleet-team-row { display: flex; flex-direction: column; gap: var(--space-2); }
+.fleet-agent-tile {
+  display: flex; align-items: center; gap: var(--space-3); width: 100%;
+  background: var(--pl-surface); border: 1px solid var(--pl-border);
+  border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-pl-sm);
+}
+.fleet-agent-tile__av {
+  flex: none; width: var(--ctl-lg, 56px); height: var(--ctl-lg, 56px);
+  border-radius: var(--radius-full); overflow: hidden; background: var(--pl-illo-bg);
+  box-shadow: 0 0 0 1px var(--pl-border);
+}
+.fleet-agent-tile__av img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+.fleet-agent-tile__av--silhouette { display: grid; place-items: center; color: var(--pl-accent); }
+/* Fixed px, not a percentage (2026-09-07 live bug: an unsized SVG - viewBox
+   only, no width/height attributes - sized by % inside a grid container
+   rendered correctly in headless Chromium but ballooned to fill the page
+   in real desktop Chrome, confirmed in an incognito window so not a cache
+   issue. Every other icon in this file sizes its svg in fixed px - this
+   was the one exception; matching the established pattern fixes it). */
+.fleet-agent-tile__av--silhouette svg { width: 31px; height: 31px; flex: none; }
+.fleet-agent-tile__body { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.fleet-agent-tile__body strong { font-size: var(--text-body); font-weight: 700; color: var(--pl-fg); }
+.fleet-agent-tile__body span { font-size: var(--text-sm); color: var(--pl-fg-secondary); line-height: 1.4; }
+.fleet-broke { margin-top: var(--space-5); }
+.fleet-broke strong { color: var(--pl-fg); }
+.fleet-restart { justify-content: center; margin-top: var(--space-5); }
+.fleet-done-cohort { text-align: center; padding-bottom: var(--space-6); }
+.fleet-done-cohort .eyebrow { justify-content: center; }
+[dir] .fleet-done-cohort .section-title { text-align: center; max-width: none; margin-inline: auto; }
+
+/* #/fleet single-card steps use .moment-page (above). The footer is decided at
+   render: compact on S0 (public landing, legal links), absent mid-task, full
+   on S7/S9 (same mechanism as #/kit, which renders none). */
+.footer--compact { padding-block: var(--space-5); margin-top: 0; }
+
+/* Question / entry titles: never a one-word orphan on the second line (Ofir,
+   2026-09-06: "why does the title drop a line when only one word is beneath?
+   make the two rows almost equal"). `text-wrap: balance` is exactly that rule
+   in the browser (Chrome 114+, Safari 17.5+); older browsers keep the normal
+   wrap, nothing breaks. Kept to the card's title + sub, not site-wide. */
+.fleet-card .login__title, .fleet-card .login__sub { text-wrap: balance; }
+
+/* EXTEND .chip — leading brand mark (DSL, 2026-09-06). Monochrome, currentColor:
+   it takes the chip's ink and turns accent when selected. Brand colors never
+   enter the palette. Same 18px as the mic icon in .chip--toggle. */
+.chip__logo { width: 18px; height: 18px; flex: none; display: grid; place-items: center; }
+.chip__logo svg { width: 100%; height: 100%; fill: currentColor; }
+/* No mark exists for the tool: its initial in a disc (the .quote__av recipe at chip scale). */
+.chip__logo--initial {
+  border-radius: var(--radius-full); background: var(--pl-bg-alt);
+  font-size: var(--text-caption); font-weight: 700; line-height: 1;
+}
+.chip--choice[aria-checked="true"] .chip__logo--initial {
+  background: color-mix(in srgb, var(--pl-accent) 16%, var(--pl-surface));
+}
+.chip--choice { max-width: 100%; }
+
+/* Page glue (product code, not system): the "Other" disclosure under the row.
+   Reuses .field + .input; .field is display:grid so [hidden] needs the rule. */
+.fleet-other { max-width: 16rem; margin: var(--space-4) auto 0; }
+.fleet-other[hidden] { display: none; }
+
+/* q1-q4's multi-select chip questions (2026-09-08): the "other" free-text
+   field that opens alongside picked chips is a plain .field, same as a
+   question's own textarea - full width, no .fleet-other narrowing (that
+   class is sized for the small tools-picker input above, not this).
+   Scoped to data-fleet-choices-wrap only, same [hidden]-needs-a-rule
+   reason as .fleet-other above. */
+.field[data-fleet-choices-wrap][hidden] { display: none; }
+
+/* ---- #/fleet S6 readers — role types being compared (2026-09-06, v2 2026-09-07)
+   Page composition from existing parts: .moment-card, an avatar at reading
+   size (--ctl-lg = 56px disc, same crop as .team__photo img — or
+   .avatar-initial when the pool entry is a library role with no portrait),
+   a light speech bubble on the .nav__accmenu floating-surface recipe, and
+   .skel's opacity language for the bar. The bob is the only new motion:
+   2.4s, 3px, off under reduced-motion.
+   ⛔ v2 (Ofir, 2026-09-07): ONE reader at a time now, not three side by side
+   (wireFleet swaps which pool entry - crew or library role - is rendered).
+   grid-template-columns/max-width sized for a single centered item; every
+   other rule (bubble shape, bar, bob) is unchanged from the original. */
+.fleet-card--loading { max-width: 40rem; }
+.fleet-loading { margin-top: var(--space-5); }
+.readers { list-style: none; margin: 0 auto; padding: 0; display: grid; grid-template-columns: 1fr; max-width: 22rem; gap: var(--space-4); align-items: start; }
+.reader { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); animation: reader-bob 2.4s var(--ease-pl) infinite; transition: opacity 0.18s var(--ease-pl), transform 0.18s var(--ease-pl); }
+.reader.is-swapping { opacity: 0; transform: translateY(2px); }
+.reader__av { flex: none; width: var(--ctl-lg, 56px); height: var(--ctl-lg, 56px); border-radius: var(--radius-full); overflow: hidden; background: var(--pl-illo-bg); box-shadow: 0 0 0 1px var(--pl-border); }
+.reader__av img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+.reader__name { font-size: var(--text-caption); font-weight: 700; color: var(--pl-fg-secondary); }
+.reader__bubble {
+  position: relative; display: block; min-height: 3.2em; width: 100%;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
+  background: var(--pl-surface); border: 1px solid var(--pl-border); box-shadow: var(--shadow-pl-md);
+  font-size: var(--text-sm); font-weight: 600; color: var(--pl-fg); line-height: 1.35; text-align: center;
+}
+.reader__bubble::after {
+  content: ""; position: absolute; left: 50%; top: 100%; width: 10px; height: 10px; margin-top: -5px;
+  background: var(--pl-surface); border-right: 1px solid var(--pl-border); border-bottom: 1px solid var(--pl-border);
+  transform: translateX(-50%) rotate(45deg);
+}
+.reader__bar { position: relative; height: 4px; margin: var(--space-5) auto 0; max-width: 16rem; border-radius: var(--radius-full); background: var(--pl-bg-alt); overflow: hidden; }
+.reader__bar span { position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: var(--radius-full); background: var(--pl-accent); animation: reader-bar 1.6s var(--ease-pl) infinite; }
+.fleet-loading .ss-note { margin-top: var(--space-4); }
+@keyframes reader-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes reader-bar { 0% { left: -40%; } 100% { left: 100%; } }
+@media (max-width: 620px) {
+  .readers { gap: var(--space-3); }
+  .reader { flex-direction: row-reverse; justify-content: flex-start; text-align: start; }
+  [dir="ltr"] .reader { flex-direction: row; }
+  .reader__bubble { min-height: 0; text-align: start; }
+  /* Physical, not logical: row-reverse (RTL) + row (LTR) above cancel out on
+     purpose so the avatar sits physically right in BOTH languages - the
+     arrow must match with a physical `right`, not `inset-inline-end` (which
+     flips with dir and put the arrow on the wrong edge, pointing at nothing). */
+  .reader__bubble::after { left: auto; right: -5px; top: 50%; margin-top: -5px; transform: translateY(-50%) rotate(-45deg); }
+  .reader__name { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .reader, .reader__bar span { animation: none; } .reader__bar span { width: 100%; opacity: 0.4; } }
+

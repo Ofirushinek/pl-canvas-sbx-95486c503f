@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Lab</title>
+  <meta name="description" content="ב-3 שעות תקימו עם Claude צוות סוכני AI, עם זיכרון משותף, ותתחילו לבנות איתו. בזמן אמת." />
+  <!-- Icons. TWO TIERS, chosen by the size the icon is seen at — do not mix them:
+       small (.ico, 16/32/48) is ONE character, transparent, legible at tab size;
+       the 180px iOS tile is the FULL four-head mark on opaque cream #FBEAD9
+       (transparency on an iOS tile gets composited onto black).
+       New filenames, not a re-upload of favicon.png — a changed asset behind an
+       unchanged name is how this project has been bitten by CDN caching before. -->
+  <link rel="icon" href="assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <!-- noindex until launch -->
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Google Analytics (GA4) — CTO, 2026-09-07. Real Measurement ID (Ofir's
+       "Product Lab" GA4 property, account 407094967), wired 2026-09-08.
+       gtag.js loads async and is safe if blocked (ad blocker / offline):
+       app.js's ga()/gaPageview() helpers no-op silently when `gtag` isn't a
+       function, so a missing/blocked script never breaks the page.
+       send_page_view is OFF on purpose — this is a single-page app (hash
+       routing), so the automatic pageview would fire once on first load and
+       never again; app.js's route() fires page_view manually on every real
+       route change instead (home/#/prep/#/kit/#/fleet/...). -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-93F67CDBNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-93F67CDBNC", { send_page_view: false });
+  </script>
+
+  <!-- Open Graph / social link preview (copy reused from the hero: hero_title + hero_sub) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://productlab.studio/" />
+  <meta property="og:site_name" content="Product Lab" />
+  <meta property="og:locale" content="he_IL" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:title" content="מרעיון למציאות. עולם חדש של עבודה עם סוכני AI." />
+  <meta property="og:description" content="ב-3 שעות תקימו עם Claude צוות סוכני AI, עם זיכרון משותף, ותתחילו לבנות איתו. בזמן אמת." />
+  <meta property="og:image" content="https://productlab.studio/assets/og-card.png" />
+  <meta property="og:image:secure_url" content="https://productlab.studio/assets/og-card.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Product Lab, the four felt agent heads beside the Product Lab wordmark, on plum." />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="מרעיון למציאות. עולם חדש של עבודה עם סוכני AI." />
+  <meta name="twitter:description" content="ב-3 שעות תקימו עם Claude צוות סוכני AI, עם זיכרון משותף, ותתחילו לבנות איתו. בזמן אמת." />
+  <meta name="twitter:image" content="https://productlab.studio/assets/og-card.png" />
+  <!-- Preload the above-the-fold hero (responsive: mobile vs desktop WebP) so it
+       downloads first and paints fast. Matches the <picture> media breakpoints. -->
+  <link rel="preload" as="image" href="assets/hero-room.webp?v=1" type="image/webp" media="(min-width: 761px)" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/hero-room-mobile.webp?v=3" type="image/webp" media="(max-width: 760px)" fetchpriority="high" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Fredoka is the brand wordmark face and is used ONLY by the intro curtain.
+       Kept as its own request so the site's own font URL stays byte-identical. -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260909g" />
+  <!-- Site intro (once per session, and again on every refresh). Nothing here hides the site: the veil is
+       created by assets/intro.js and by nothing else, so if the script or these
+       stylesheets fail the visitor simply gets the page. intro-keyframes.css is
+       GENERATED by assets/logo/make_intro.py — replace it wholesale, never edit. -->
+  <link rel="stylesheet" href="assets/intro.css?v=20260824b" />
+  <link rel="stylesheet" href="assets/intro-keyframes.css" />
+</head>
+<body>
+  <!-- Must run before first paint, or the site shows and THEN gets a curtain. -->
+  <script src="assets/intro.js?v=20260831b"></script>
+  <div id="app"></div>
+  <noscript><div class="wrap section">Please enable JavaScript to view this page.</div></noscript>
+  <!-- Supabase client (UMD global: window.supabase). MUST load before app.js so
+       the client + Google sign-in are available when the app boots. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Gated workshop content (window.WORKSHOP_CONTENT) — MUST load before app.js.
+       Bump ?v= when content.js changes so browsers fetch the new version. -->
+  <script src="content.js?v=20260907r"></script>
+  <!-- #/fleet page strings (window.FLEET_CONTENT) — MUST load before app.js.
+       Bump ?v= when fleet-content.js changes. -->
+  <script src="fleet-content.js?v=20260909c"></script>
+  <script src="app.js?v=20260909l"></script>
+  <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "95ea9cd222ad40c99328d07e4430db84"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
