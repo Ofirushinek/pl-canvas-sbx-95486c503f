@@ -856,7 +856,7 @@ button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
 .modal__card--form { max-width: 30rem; }
 .reg__form { display: grid; gap: var(--space-4); margin-top: 1.6rem; text-align: start; }
 .reg__note {
-  width: 100%; min-height: 4.75rem; resize: vertical;
+  width: 100%; min-height: 6.75rem; resize: vertical;
   padding: 0.7rem 0.95rem; border: 1px solid var(--pl-border-strong);
   border-radius: var(--radius-md); background: var(--pl-surface);
   color: var(--pl-fg); font-family: inherit; font-size: var(--text-body); font-weight: 500; line-height: 1.5;
