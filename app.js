@@ -1891,9 +1891,9 @@ function anEventsTable(t, lang, rows) {
     return `<tr class="roster__row">
       <td data-label="${t.an_col_time}" dir="ltr">${escapeHtml(e.time)}</td>
       <td data-label="${t.an_col_user}" class="roster__stack">
-        <span class="roster__person">
-          <span class="roster__pname" dir="ltr">${escapeHtml(e.user)}</span>
-          <span class="roster__pmail" dir="ltr">${escapeHtml(e.ip)}</span>
+        <span class="roster__person" dir="${textDir(e.user, "ltr")}">
+          <span class="roster__pname">${escapeHtml(e.user)}</span>
+          <span class="roster__pmail">${escapeHtml(e.ip)}</span>
         </span>
       </td>
       <td data-label="${t.an_col_location}">${escapeHtml(e.loc)}</td>
@@ -2831,9 +2831,9 @@ async function renderRoster(lang) {
     // its own) and so are the access pill and the signed-in moment. Two fewer
     // columns is what buys `מקור` and `צעד הבא` enough width to be read without
     // clicking - which is the whole complaint.
-    const person = `<span class="roster__person">
-          <span class="roster__pname" dir="${textDir(name, "auto")}">${escapeHtml(name) || `<span class="roster__none">—</span>`}</span>
-          ${r.email ? `<span class="roster__pmail" dir="ltr">${escapeHtml(r.email)}</span>` : ""}
+    const person = `<span class="roster__person" dir="${textDir(name, "auto")}">
+          <span class="roster__pname">${escapeHtml(name) || `<span class="roster__none">—</span>`}</span>
+          ${r.email ? `<span class="roster__pmail">${escapeHtml(r.email)}</span>` : ""}
         </span>`;
 
     const open = ROSTER_OPEN.has(rowKey(r));

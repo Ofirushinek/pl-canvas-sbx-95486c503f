@@ -965,7 +965,7 @@ button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
 .roster__table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
 .roster__table--fixed { table-layout: fixed; }
 .roster__table th, .roster__table td {
-  padding: var(--space-3); text-align: start; vertical-align: top;
+  padding: var(--space-3); text-align: start; vertical-align: middle;
   border-bottom: 1px solid var(--pl-border);
   white-space: normal; overflow-wrap: anywhere;
 }
@@ -1089,12 +1089,6 @@ button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
   font-size: var(--text-caption); color: var(--pl-fg-secondary);
   font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
 }
-/* dir="ltr" on the address itself (so it reads left-to-right) defaults its
-   own text-align to "start" = left, which drifts out from under the RTL
-   name above it. Canvas edit, 2026-09-16 (Ofir): pin it under the name's
-   own edge in RTL only — English stays left-aligned under a left-aligned
-   name, so this never applies there. */
-[dir="rtl"] .roster__pmail { text-align: right; }
 .roster__free { color: var(--pl-fg-body); }
 
 /* `צעד הבא`, read at a glance: the date and its age on one line, the action
