@@ -1889,7 +1889,7 @@ function anEventsTable(t, lang, rows) {
     const badgeMod = AN_STATUS_BADGE[e.status];
     const label = t["an_status_" + e.status];
     return `<tr class="roster__row">
-      <td data-label="${t.an_col_time}" dir="ltr">${escapeHtml(e.time)}</td>
+      <td data-label="${t.an_col_time}" dir="${lang === "he" ? "rtl" : "ltr"}">${escapeHtml(e.time)}</td>
       <td data-label="${t.an_col_user}" class="roster__stack">
         <span class="roster__person" dir="${lang === "he" ? "rtl" : "ltr"}">
           <span class="roster__pname">${escapeHtml(e.user)}</span>
@@ -1899,7 +1899,7 @@ function anEventsTable(t, lang, rows) {
       <td data-label="${t.an_col_location}">${escapeHtml(e.loc)}</td>
       <td data-label="${t.an_col_device}">${escapeHtml(e.device)}</td>
       <td data-label="${t.an_col_status}"><span class="roster__badge roster__badge--${badgeMod}">${label}</span></td>
-      <td data-label="${t.an_col_risk}" dir="ltr" style="font-variant-numeric:tabular-nums">${e.risk.toFixed(1)}</td>
+      <td data-label="${t.an_col_risk}" dir="${lang === "he" ? "rtl" : "ltr"}" style="font-variant-numeric:tabular-nums">${e.risk.toFixed(1)}</td>
     </tr>`;
   }).join("");
   return `<div class="roster__scroll">
