@@ -1891,7 +1891,7 @@ function anEventsTable(t, lang, rows) {
     return `<tr class="roster__row">
       <td data-label="${t.an_col_time}" dir="ltr">${escapeHtml(e.time)}</td>
       <td data-label="${t.an_col_user}" class="roster__stack">
-        <span class="roster__person" dir="${textDir(e.user, "ltr")}">
+        <span class="roster__person" dir="${lang === "he" ? "rtl" : "ltr"}">
           <span class="roster__pname">${escapeHtml(e.user)}</span>
           <span class="roster__pmail">${escapeHtml(e.ip)}</span>
         </span>
