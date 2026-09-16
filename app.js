@@ -35,11 +35,19 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    profile.role column ('superadmin') is future-proofing, not the gate. */
 const ADMIN_EMAILS = ["ofr.rsnk@gmail.com"];
 
-/* Local dev flag. Google OAuth can't return to localhost (its redirect is locked
-   to productlab.studio), so on localhost we use a fake, Google-free sign-in for
-   testing. This is INERT in production (hostname is never localhost there), where
-   real Google OAuth + Supabase RLS are the only gate — so it's safe to ship. */
-const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+/* Local dev + sandbox flag. Google OAuth can't return to localhost, and can't
+   return to this standalone sandbox repo's own GitHub Pages origin either (the
+   registered redirect is locked to productlab.studio) — so anywhere that is NOT
+   the real production host uses a fake, Google-free sign-in for testing. Fixed
+   2026-09-16 (Ofir): this repo (pl-canvas-sbx-*) is a public duplicate used only
+   for UI-to-canvas capture experiments; before this fix, clicking student
+   sign-in here bounced through real Google OAuth to productlab.studio itself,
+   and every RPC (admin_roster, register_lead, …) hit the SAME shared production
+   Supabase project. Broadened from a hostname allowlist (localhost/127.0.0.1) to
+   a denylist of the one real host, so it also self-heals for a sandbox origin
+   this file has never seen before. INERT on the real site (hostname is always
+   productlab.studio there) — safe to ship there unchanged. */
+const IS_LOCAL = location.hostname !== "productlab.studio" && location.hostname !== "www.productlab.studio";
 const LOCAL_TIER_KEY = "pl_local_tier";
 
 /* ---- Analytics (GA4) ------------------------------------------------------
@@ -151,6 +159,13 @@ const I = {
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
   linkedin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>',
   doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
+  // Analytics-tab icons (2026-09-16, NEW — nothing in the existing set covers
+  // "security/blocked" or "flagged/risk"; same 24x24 viewBox, stroke-width 2,
+  // round cap/join as every other icon in this set, so they read as native.
+  // Self-audited only (Task tool unavailable this session) — flag for a real
+  // DSL sign-off on whether these join the documented icon language.
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5l-8-3Z"/><path d="m9.5 12 2 2 3.5-4"/></svg>',
+  alertTriangle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
 };
 
 /* ---- COPY (final, Copywriter 2026-08-03) -------------------------------- */
@@ -423,6 +438,42 @@ const I18N = {
     // Student-area tab bar. PLACEHOLDER HE copy 2026-08-12, Copywriter to refine.
     tab_content: "תוכן הסדנה",
     tab_students: "תלמידים",
+    // Analytics tab (2026-09-16, sandbox demo for the UI-to-canvas capture
+    // experiment). PLACEHOLDER HE copy, PD-written, not routed through the
+    // Copywriter — this tab is a non-shipping technical demo, all data fake.
+    tab_analytics: "אנליטיקס",
+    an_kicker: "אבטחה · נתוני דמו",
+    an_title: "ניטור התחברויות",
+    an_sub: "כל הנתונים בעמוד הזה מזויפים לצורך בדיקת כלי — לא מידע אמיתי.",
+    an_range_today: "היום",
+    an_range_7d: "7 ימים",
+    an_range_30d: "30 יום",
+    an_kpi_failed: "ניסיונות כושלים",
+    an_kpi_failed_sub: "24 שעות אחרונות",
+    an_kpi_blocked: "כתובות IP חסומות",
+    an_kpi_blocked_sub: "24 שעות אחרונות",
+    an_kpi_sessions: "משתמשים מחוברים",
+    an_kpi_sessions_sub: "כרגע",
+    an_kpi_risk: "ציון סיכון ממוצע",
+    an_kpi_risk_sub: "מתוך 10, 24 שעות אחרונות",
+    an_chart1_title: "ניסיונות התחברות כושלים",
+    an_chart1_sub: "14 הימים האחרונים",
+    an_chart2_title: "התחברויות לפי שעה ביום",
+    an_chart2_sub: "ממוצע יומי, אתמול",
+    an_legend_success: "הצליחו",
+    an_legend_failed: "נכשלו",
+    an_table_title: "אירועים מסומנים לאחרונה",
+    an_table_sub: "כניסות שסומנו לבדיקה על ידי כלל האבטחה",
+    an_col_time: "זמן",
+    an_col_user: "משתמש / IP",
+    an_col_location: "מיקום",
+    an_col_device: "מכשיר",
+    an_col_status: "סטטוס",
+    an_col_risk: "רמת סיכון",
+    an_status_success: "הצליח",
+    an_status_failed: "נכשל",
+    an_status_blocked: "נחסם",
+    an_status_mfa: "אותגר ב-MFA",
 
     // ---- Student prep page (gated by AUTH.tier). Teaching copy lives in
     // content.js (WORKSHOP_CONTENT). These keys are the two used by the
@@ -711,6 +762,42 @@ const I18N = {
     // Student-area tab bar. PLACEHOLDER EN copy 2026-08-12, Copywriter to refine.
     tab_content: "Course content",
     tab_students: "Students",
+    // Analytics tab (2026-09-16, sandbox demo for the UI-to-canvas capture
+    // experiment). PLACEHOLDER EN copy, PD-written, not routed through the
+    // Copywriter — this tab is a non-shipping technical demo, all data fake.
+    tab_analytics: "Analytics",
+    an_kicker: "Security · demo data",
+    an_title: "Login monitoring",
+    an_sub: "Everything on this page is fake, built to stress-test a capture tool — not real data.",
+    an_range_today: "Today",
+    an_range_7d: "7 days",
+    an_range_30d: "30 days",
+    an_kpi_failed: "Failed attempts",
+    an_kpi_failed_sub: "last 24h",
+    an_kpi_blocked: "Blocked IPs",
+    an_kpi_blocked_sub: "last 24h",
+    an_kpi_sessions: "Active sessions",
+    an_kpi_sessions_sub: "right now",
+    an_kpi_risk: "Avg risk score",
+    an_kpi_risk_sub: "out of 10, last 24h",
+    an_chart1_title: "Failed login attempts",
+    an_chart1_sub: "last 14 days",
+    an_chart2_title: "Attempts by hour of day",
+    an_chart2_sub: "daily average, yesterday",
+    an_legend_success: "Succeeded",
+    an_legend_failed: "Failed",
+    an_table_title: "Recently flagged events",
+    an_table_sub: "Sign-ins flagged for review by the security rules",
+    an_col_time: "Time",
+    an_col_user: "User / IP",
+    an_col_location: "Location",
+    an_col_device: "Device",
+    an_col_status: "Status",
+    an_col_risk: "Risk",
+    an_status_success: "Success",
+    an_status_failed: "Failed",
+    an_status_blocked: "Blocked",
+    an_status_mfa: "MFA challenged",
 
     // ---- Student prep page (gated by AUTH.tier). Teaching copy lives in
     // content.js (WORKSHOP_CONTENT). These keys are the two used by the
@@ -1558,6 +1645,388 @@ function canSee(sec) {
   return AUTH.tier === "admin" || AUTH.tier === "student";
 }
 
+/* =============================================================================
+   ANALYTICS TAB — sandbox-only demo dashboard (2026-09-16)
+   Admin-only 3rd tab on #/prep, alongside content/students. Built for the
+   UI-to-canvas capture-tool experiment: a purpose-built "harder" complex page
+   (KPI tiles + 2 charts + a status table) — NOT a real feature. ALL data below
+   is hardcoded/fake; this tab never calls sb.rpc/sb.from (see the sandbox note
+   on IS_LOCAL above — this repo shares its Supabase project with the real site).
+
+   DESIGN-SYSTEM CONSULT (self-audited — Task tool unavailable this session,
+   same recurring circumstance as most of this repo's recent history; flag for
+   a real Design System Lead sign-off before this pattern is treated as
+   canonical):
+   REUSED verbatim: `.tabs`/`.tabs__btn`/`.tabpanel` (the #/prep tab bar itself),
+     `.tabs--pill` (2026-09-14 EXTEND, the upcoming/past toggle) for the time-
+     range filter, `.card`/`.card__ico` (KPI tiles), `.roster__scroll`/
+     `.roster__table`/`.roster__row`/`.roster__badge`(--ok/--warn) (the flagged-
+     events table — same "status pill table" component as the students roster,
+     new content only), `.btn`/`.btn--ghost`.
+   EXTENDED: `.roster__badge--danger` (new modifier, same recipe as --ok/--warn:
+     color-mix tint of an existing token) — the roster table only ever needed
+     2 severities (ok/warn); this table needs a 3rd (blocked/failed), using the
+     ALREADY-EXISTING `--pl-stage-dropped` red (the same hex `.btn--danger`
+     already uses) rather than a new hex.
+   NEW: the two chart primitives (line+area trend, stacked-hour bars) and the
+     KPI stat-tile's mini sparkline — nothing chart-shaped exists in this
+     system yet. Built to the `dataviz` skill's mark specs (2px line, ~10%
+     area wash, hairline solid gridlines, 24px-cap bars with a 4px top round +
+     2px surface gap between stacked segments, legend for 2+ series, hover
+     AND focus tooltips) but themed entirely in `--pl-*` tokens — zero new hex.
+     `I.shield`/`I.alertTriangle` are 2 new icons, same 24px/stroke-2 language.
+   TOKENS ADDED: none. Every color here is an existing `--pl-*` token reused —
+     see COLOR MAP below for which token means what and why.
+   PERSONA REVIEW: not run — Task tool unavailable this session, and this
+     surface has no end-user (admin-only internal demo, not a real feature).
+     Flagging rather than skipping silently.
+
+   COLOR MAP (reused, not new — the same 3 tokens mean the same thing in every
+   chart/badge/KPI on this tab, so the page reads as one system):
+     --pl-accent        (violet) = success / normal / "the ok badge's own color"
+     --pl-crew-orange              = suspicious / warn (matches roster's --warn)
+     --pl-stage-dropped (red)   = danger / blocked / failed (matches .btn--danger)
+   ========================================================================== */
+
+/* ---- fake data (14 days of daily failed-attempt counts, ending "today") --- */
+const AN_RANGES = {
+  today: {
+    trendLabels: ["00", "04", "08", "12", "16", "20", "23"],
+    trend: [1, 0, 2, 3, 5, 4, 3],
+    kpi: { failed: 18, failedDelta: +3, blocked: 5, blockedDelta: +1, sessions: 142, sessionsDelta: -3, risk: 3.2, riskDelta: -0.4 },
+    eventsCount: 4,
+  },
+  "7d": {
+    trendLabels: ["ה-6", "ה-5", "ה-4", "ה-3", "ה-2", "אתמול", "היום"],
+    trendLabelsEn: ["-6d", "-5d", "-4d", "-3d", "-2d", "yday", "today"],
+    trend: [7, 6, 9, 8, 10, 15, 18],
+    kpi: { failed: 73, failedDelta: +21, blocked: 22, blockedDelta: +6, sessions: 142, sessionsDelta: +12, risk: 3.6, riskDelta: -0.2 },
+    eventsCount: 6,
+  },
+  "30d": {
+    trendLabels: null, // generated (30 points)
+    trend: [4, 6, 5, 7, 6, 5, 8, 7, 6, 9, 8, 7, 10, 9, 8, 11, 10, 9, 12, 11, 10, 13, 12, 11, 14, 13, 15, 18, 15, 18],
+    kpi: { failed: 312, failedDelta: +48, blocked: 88, blockedDelta: +14, sessions: 142, sessionsDelta: +5, risk: 3.9, riskDelta: +0.3 },
+    eventsCount: 8,
+  },
+};
+// Sparklines for the 3 non-trend KPI tiles — 7-point mini series, independent
+// of the range filter (they always read "recent shape"), per the dataviz stat-
+// tile contract (12-pt sparkline in a de-emphasis hue, endpoint in the status hue).
+const AN_SPARK = {
+  blocked: [2, 3, 1, 4, 2, 3, 5],
+  sessions: [118, 130, 125, 138, 150, 145, 142],
+  risk: [4.1, 3.9, 3.7, 3.8, 3.5, 3.6, 3.2],
+};
+// Hourly attempt breakdown (success vs failed) — kept constant across the
+// range filter on purpose: this is a fixed "yesterday's shape" reference
+// panel, not scoped by the date-range control (its own subtitle says so).
+// Same units on one axis throughout (a stacked bar, not two y-scales), so the
+// success/failed magnitude gap (~40 vs ~2 per hour) never becomes a dual-axis
+// situation — see the dataviz anti-pattern this was built to avoid.
+const AN_HOURLY = {
+  success: [3, 2, 1, 1, 1, 2, 6, 14, 22, 28, 31, 30, 27, 29, 31, 30, 26, 22, 18, 14, 11, 8, 6, 4],
+  failed: [1, 1, 2, 3, 2, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0],
+};
+// Flagged-events table — 8 rows, sliced per range (fewer for "today"). Every
+// field invented; no real IP/user/device.
+const AN_EVENTS = [
+  { time: "23:47", user: "d.demo@example.com", ip: "203.0.113.14", loc: "Tel Aviv, IL", device: "Chrome · macOS", status: "blocked", risk: 9.1 },
+  { time: "21:12", user: "unknown", ip: "198.51.100.7", loc: "Unknown", device: "curl/8.4", status: "blocked", risk: 8.7 },
+  { time: "18:03", user: "r.demo@example.com", ip: "203.0.113.62", loc: "Haifa, IL", device: "Safari · iOS", status: "mfa", risk: 5.4 },
+  { time: "14:55", user: "n.demo@example.com", ip: "203.0.113.9", loc: "Ramat Gan, IL", device: "Chrome · Windows", status: "success", risk: 1.2 },
+  { time: "11:20", user: "unknown", ip: "192.0.2.44", loc: "Unknown", device: "Chrome · Linux", status: "failed", risk: 6.8 },
+  { time: "09:41", user: "a.demo@example.com", ip: "203.0.113.5", loc: "Tel Aviv, IL", device: "Edge · Windows", status: "success", risk: 1.0 },
+  { time: "03:15", user: "unknown", ip: "198.51.100.19", loc: "Unknown", device: "python-requests", status: "blocked", risk: 9.6 },
+  { time: "01:02", user: "y.demo@example.com", ip: "203.0.113.31", loc: "Jerusalem, IL", device: "Firefox · macOS", status: "mfa", risk: 4.3 },
+];
+
+const AN_STATUS_TOKEN = { success: "--pl-accent", mfa: "--pl-crew-orange", failed: "--pl-stage-dropped", blocked: "--pl-stage-dropped" };
+const AN_STATUS_BADGE = { success: "ok", mfa: "warn", failed: "danger", blocked: "danger" };
+
+function anNiceMax(max) {
+  if (max <= 0) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(max)));
+  const n = max / p;
+  const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return step * p;
+}
+
+/* Single-series line + area chart (failed-attempts trend). Pure function:
+   labels[]/values[] in, an SVG string out. Forced dir="ltr" internally — time
+   always flows oldest→newest left→right on a trend chart, even on an RTL page
+   (the page's own labels/titles stay in the page direction; only the plot is
+   pinned LTR, same convention virtually every charting library uses). */
+function anLineChart(labels, values, colorVar, fmt) {
+  const W = 640, H = 200, padL = 30, padR = 10, padT = 14, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const max = anNiceMax(Math.max(...values));
+  const x = (i) => padL + (plotW * i) / (values.length - 1);
+  const y = (v) => padT + plotH - (plotH * v) / max;
+  const pts = values.map((v, i) => [x(i), y(v)]);
+  const linePath = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+  const areaPath = `${linePath} L${pts[pts.length - 1][0].toFixed(1)},${(padT + plotH).toFixed(1)} L${pts[0][0].toFixed(1)},${(padT + plotH).toFixed(1)} Z`;
+  const ticks = [0, 0.5, 1].map((f) => Math.round(max * f));
+  const grid = ticks.map((v) => {
+    const gy = y(v);
+    return `<line x1="${padL}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="var(--pl-border)" stroke-width="1"/>
+      <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" font-size="10" fill="var(--pl-fg-muted)">${v}</text>`;
+  }).join("");
+  // Sparse x labels: first, ~mid, last only — avoids a crowded axis at 30 points.
+  const showIdx = new Set([0, Math.round((values.length - 1) / 2), values.length - 1]);
+  const xLabels = labels.map((l, i) => showIdx.has(i)
+    ? `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--pl-fg-muted)">${l}</text>` : "").join("");
+  const dots = pts.map((p, i) => `<circle data-tip="${escapeAttr(labels[i] + ": " + fmt(values[i]))}" tabindex="0" role="img"
+      aria-label="${escapeAttr(labels[i] + ": " + fmt(values[i]))}"
+      cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="10" fill="transparent" class="an-hit"></circle>`).join("");
+  const last = pts[pts.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" dir="ltr" class="an-svg" data-an-line>
+    ${grid}
+    <path d="${areaPath}" fill="var(${colorVar})" opacity="0.10" stroke="none"/>
+    <path d="${linePath}" fill="none" stroke="var(${colorVar})" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="5" fill="var(${colorVar})" stroke="var(--pl-surface)" stroke-width="2"/>
+    <line data-an-crosshair x1="0" x2="0" y1="${padT}" y2="${padT + plotH}" stroke="var(--pl-border-strong)" stroke-width="1" opacity="0"/>
+    ${xLabels}
+    ${dots}
+  </svg>`;
+}
+
+/* Stacked-bar hourly chart (success + failed, one shared count axis — see the
+   anti-pattern note above for why this is safe despite the magnitude gap). */
+function anStackedBar(hours, success, failed, colorA, colorB, t) {
+  const W = 640, H = 200, padL = 30, padR = 10, padT = 14, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const n = hours;
+  const totals = success.map((v, i) => v + failed[i]);
+  const max = anNiceMax(Math.max(...totals));
+  const band = plotW / n;
+  const barW = Math.min(24, band * 0.62);
+  const gap = 2; // surface-gap between the two stacked segments, per mark spec
+  const y = (v) => padT + plotH - (plotH * v) / max;
+  const ticks = [0, 0.5, 1].map((f) => Math.round(max * f));
+  const grid = ticks.map((v) => {
+    const gy = y(v);
+    return `<line x1="${padL}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="var(--pl-border)" stroke-width="1"/>
+      <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" font-size="10" fill="var(--pl-fg-muted)">${v}</text>`;
+  }).join("");
+  const bars = [];
+  for (let i = 0; i < n; i++) {
+    const cx = padL + band * i + band / 2;
+    const bx = cx - barW / 2;
+    const sH = (plotH * success[i]) / max;
+    const fH = (plotH * failed[i]) / max;
+    const baseline = padT + plotH;
+    const sy = baseline - sH;
+    const fy = failed[i] > 0 ? sy - gap - fH : sy;
+    // Bottom segment (success): square top (it butts the gap), square baseline.
+    if (success[i] > 0) bars.push(`<rect x="${bx.toFixed(1)}" y="${sy.toFixed(1)}" width="${barW.toFixed(1)}" height="${sH.toFixed(1)}" fill="${colorA}"/>`);
+    // Top segment (failed): 4px rounded top corners only, per the mark spec.
+    if (failed[i] > 0) bars.push(`<path d="M${bx.toFixed(1)},${(fy + fH).toFixed(1)} L${bx.toFixed(1)},${(fy + 4).toFixed(1)} Q${bx.toFixed(1)},${fy.toFixed(1)} ${(bx + 4).toFixed(1)},${fy.toFixed(1)} L${(bx + barW - 4).toFixed(1)},${fy.toFixed(1)} Q${(bx + barW).toFixed(1)},${fy.toFixed(1)} ${(bx + barW).toFixed(1)},${(fy + 4).toFixed(1)} L${(bx + barW).toFixed(1)},${(fy + fH).toFixed(1)} Z" fill="${colorB}"/>`);
+    const tip = escapeAttr(`${String(i).padStart(2, "0")}:00 — ${t.an_legend_success}: ${success[i]}, ${t.an_legend_failed}: ${failed[i]}`);
+    bars.push(`<rect data-tip="${tip}" tabindex="0" role="img" aria-label="${tip}"
+        x="${bx.toFixed(1)}" y="${padT}" width="${Math.max(barW, 20).toFixed(1)}" height="${plotH.toFixed(1)}" fill="transparent" class="an-hit"></rect>`);
+  }
+  const xLabels = [0, 6, 12, 18].map((h) => {
+    const cx = padL + band * h + band / 2;
+    return `<text x="${cx.toFixed(1)}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--pl-fg-muted)">${String(h).padStart(2, "0")}</text>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" dir="ltr" class="an-svg" data-an-bar>
+    ${grid}${bars.join("")}${xLabels}
+    <line data-an-crosshair x1="0" x2="0" y1="0" y2="0" opacity="0"/>
+  </svg>`;
+}
+
+/* Tiny 7-point sparkline for a KPI tile — de-emphasis gray, endpoint dot in the
+   tile's own status hue (good/bad/neutral), per the dataviz stat-tile contract. */
+function anSparkline(values, endColorVar) {
+  const W = 96, H = 28, pad = 3;
+  const max = Math.max(...values), min = Math.min(...values);
+  const span = max - min || 1;
+  const x = (i) => pad + ((W - pad * 2) * i) / (values.length - 1);
+  const y = (v) => H - pad - ((H - pad * 2) * (v - min)) / span;
+  const path = values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const last = [x(values.length - 1), y(values[values.length - 1])];
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="stat-tile__spark" aria-hidden="true">
+    <path d="${path}" fill="none" stroke="var(--pl-fg-muted)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.5" fill="var(${endColorVar})"/>
+  </svg>`;
+}
+
+function anFmtNum(v) { return Number.isInteger(v) ? String(v) : v.toFixed(1); }
+
+// delta -> { text, cls }. `goodWhenDown` flips which direction reads as good
+// (fewer failed attempts = good; a status color must MEAN good/bad, never
+// just follow the sign, per the dataviz anti-pattern on status-color misuse).
+function anDelta(delta, goodWhenDown, neutral) {
+  if (neutral) return { text: (delta > 0 ? "+" : "") + anFmtNum(delta), cls: "" };
+  const isGood = goodWhenDown ? delta <= 0 : delta >= 0;
+  return { text: (delta > 0 ? "+" : "") + anFmtNum(delta), cls: isGood ? "stat-tile__delta--good" : "stat-tile__delta--bad" };
+}
+
+function anStatTile(icon, label, sub, value, delta, spark, endColorVar) {
+  return `<div class="card stat-tile reveal">
+    <div class="card__ico">${icon}</div>
+    <span class="stat-tile__label">${label}</span>
+    <div class="stat-tile__row">
+      <span class="stat-tile__value">${value}</span>
+      ${spark}
+    </div>
+    <div class="stat-tile__foot">
+      <span class="stat-tile__delta ${delta.cls}">${delta.text}</span>
+      <span class="stat-tile__sub">${sub}</span>
+    </div>
+  </div>`;
+}
+
+function anEventsTable(t, lang, rows) {
+  const body = rows.map((e) => {
+    const badgeMod = AN_STATUS_BADGE[e.status];
+    const label = t["an_status_" + e.status];
+    return `<tr class="roster__row">
+      <td data-label="${t.an_col_time}" dir="ltr">${escapeHtml(e.time)}</td>
+      <td data-label="${t.an_col_user}" class="roster__stack">
+        <span class="roster__person">
+          <span class="roster__pname" dir="ltr">${escapeHtml(e.user)}</span>
+          <span class="roster__pmail" dir="ltr">${escapeHtml(e.ip)}</span>
+        </span>
+      </td>
+      <td data-label="${t.an_col_location}">${escapeHtml(e.loc)}</td>
+      <td data-label="${t.an_col_device}">${escapeHtml(e.device)}</td>
+      <td data-label="${t.an_col_status}"><span class="roster__badge roster__badge--${badgeMod}">${label}</span></td>
+      <td data-label="${t.an_col_risk}" dir="ltr" style="font-variant-numeric:tabular-nums">${e.risk.toFixed(1)}</td>
+    </tr>`;
+  }).join("");
+  return `<div class="roster__scroll">
+    <table class="roster__table roster__table--fixed">
+      <colgroup><col style="width:9%"/><col style="width:26%"/><col style="width:20%"/><col style="width:20%"/><col style="width:14%"/><col style="width:11%"/></colgroup>
+      <thead><tr>
+        <th>${t.an_col_time}</th><th>${t.an_col_user}</th><th>${t.an_col_location}</th>
+        <th>${t.an_col_device}</th><th>${t.an_col_status}</th><th>${t.an_col_risk}</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>
+  </div>`;
+}
+
+// Rebuilds everything the range filter scopes (KPI row + trend chart + table)
+// and re-wires that subtree's tooltips. Chart 2 (hourly) is untouched — see
+// the AN_HOURLY comment for why it isn't scoped by this filter.
+function anRenderRange(range, t, lang) {
+  const host = document.querySelector("[data-an-scoped]");
+  if (!host) return;
+  const d = AN_RANGES[range];
+  const labels = d.trendLabels || Array.from({ length: d.trend.length }, (_, i) => String(i + 1));
+  host.innerHTML = `
+    <div class="kpi-row">
+      ${anStatTile(I.alertTriangle, t.an_kpi_failed, t.an_kpi_failed_sub, d.kpi.failed,
+        anDelta(d.kpi.failedDelta, true), anSparkline(d.trend, "--pl-stage-dropped"), "--pl-stage-dropped")}
+      ${anStatTile(I.shield, t.an_kpi_blocked, t.an_kpi_blocked_sub, d.kpi.blocked,
+        anDelta(d.kpi.blockedDelta, false, true), anSparkline(AN_SPARK.blocked, "--pl-fg-secondary"), "--pl-fg-secondary")}
+      ${anStatTile(I.users, t.an_kpi_sessions, t.an_kpi_sessions_sub, d.kpi.sessions,
+        anDelta(d.kpi.sessionsDelta, false, true), anSparkline(AN_SPARK.sessions, "--pl-fg-secondary"), "--pl-fg-secondary")}
+      ${anStatTile(I.check, t.an_kpi_risk, t.an_kpi_risk_sub, d.kpi.risk.toFixed(1),
+        anDelta(d.kpi.riskDelta, true), anSparkline(AN_SPARK.risk, "--pl-stage-confirmed"), "--pl-stage-confirmed")}
+    </div>
+    <div class="card chart-card reveal" style="margin-top:1.5rem">
+      <div class="chart-card__head">
+        <div><h3>${t.an_chart1_title}</h3><p class="chart-card__sub">${t.an_chart1_sub}</p></div>
+      </div>
+      <div class="chart-card__canvas">${anLineChart(labels, d.trend, "--pl-stage-dropped", (v) => v + " " + t.an_kpi_failed.toLowerCase())}</div>
+    </div>
+    <div class="section-title-row" style="margin-top:2rem">
+      <div class="reveal">
+        <span class="eyebrow">${t.an_kicker}</span>
+        <h2 class="section-title" style="font-size:var(--text-h3)">${t.an_table_title}</h2>
+        <p class="section-lead">${t.an_table_sub}</p>
+      </div>
+    </div>
+    <div style="margin-top:1rem">${anEventsTable(t, lang, AN_EVENTS.slice(0, d.eventsCount))}</div>`;
+  anWireTooltips(host);
+}
+
+// Shared tooltip element + delegated hover/focus wiring for any [data-tip]
+// hit target inside `root` (dataviz "interaction.md": hover AND keyboard focus
+// show the same content; values are set via textContent, never innerHTML).
+let AN_TOOLTIP_EL = null;
+function anWireTooltips(root) {
+  if (!AN_TOOLTIP_EL) {
+    AN_TOOLTIP_EL = document.createElement("div");
+    AN_TOOLTIP_EL.className = "chart-tooltip";
+    AN_TOOLTIP_EL.hidden = true;
+    document.body.appendChild(AN_TOOLTIP_EL);
+  }
+  const show = (el, x, y) => {
+    AN_TOOLTIP_EL.textContent = el.getAttribute("data-tip") || "";
+    AN_TOOLTIP_EL.style.left = x + "px";
+    AN_TOOLTIP_EL.style.top = y + "px";
+    AN_TOOLTIP_EL.hidden = false;
+    const svg = el.closest("svg");
+    if (svg) { const cross = svg.querySelector("[data-an-crosshair]"); if (cross) { cross.setAttribute("x1", el.getAttribute("cx") || el.getAttribute("x") || 0); cross.setAttribute("x2", el.getAttribute("cx") || el.getAttribute("x") || 0); cross.setAttribute("opacity", "1"); } }
+  };
+  const hide = (el) => {
+    AN_TOOLTIP_EL.hidden = true;
+    const svg = el && el.closest("svg");
+    if (svg) { const cross = svg.querySelector("[data-an-crosshair]"); if (cross) cross.setAttribute("opacity", "0"); }
+  };
+  root.querySelectorAll("[data-tip]").forEach((el) => {
+    el.addEventListener("pointerenter", (e) => show(el, e.clientX + 14, e.clientY + 14));
+    el.addEventListener("pointermove", (e) => show(el, e.clientX + 14, e.clientY + 14));
+    el.addEventListener("pointerleave", () => hide(el));
+    el.addEventListener("focus", () => { const r = el.getBoundingClientRect(); show(el, r.left, r.bottom + 6); });
+    el.addEventListener("blur", () => hide(el));
+  });
+}
+
+// Full analytics tab panel. Range filter (`.tabs--pill`, EXTEND, reused
+// verbatim from the 2026-09-14 upcoming/past toggle) sits in ONE row above
+// everything it scopes, per the dataviz interaction rule.
+function analyticsPanel(t, lang) {
+  return `
+    <section class="section" data-analytics-section><div class="wrap roster-wrap">
+      <div class="reveal">
+        <span class="eyebrow">${t.an_kicker}</span>
+        <h2 class="section-title">${t.an_title}</h2>
+        <p class="section-lead">${t.an_sub}</p>
+      </div>
+      <div class="sessions-tabsrow" style="margin-top:1.5rem;justify-content:flex-start">
+        <div class="tabs tabs--pill" role="tablist" data-an-range>
+          <button type="button" class="tabs__btn" role="tab" data-range="today" aria-selected="true">${t.an_range_today}</button>
+          <button type="button" class="tabs__btn" role="tab" data-range="7d" aria-selected="false">${t.an_range_7d}</button>
+          <button type="button" class="tabs__btn" role="tab" data-range="30d" aria-selected="false">${t.an_range_30d}</button>
+        </div>
+      </div>
+      <div data-an-scoped style="margin-top:1.5rem"></div>
+      <div class="card chart-card reveal" style="margin-top:1.5rem">
+        <div class="chart-card__head">
+          <div><h3>${t.an_chart2_title}</h3><p class="chart-card__sub">${t.an_chart2_sub}</p></div>
+          <div class="chart-legend">
+            <span class="chart-legend__item"><span class="chart-legend__swatch" style="background:var(--pl-accent)"></span>${t.an_legend_success}</span>
+            <span class="chart-legend__item"><span class="chart-legend__swatch" style="background:var(--pl-stage-dropped)"></span>${t.an_legend_failed}</span>
+          </div>
+        </div>
+        <div class="chart-card__canvas" data-an-hourly></div>
+      </div>
+    </div></section>`;
+}
+
+// Called once after the tab bar is wired (isAdmin only). Draws the
+// range-scoped block at its default ("today"), the constant hourly chart, and
+// binds the pill filter to re-render + re-wire the scoped block only.
+function initAnalyticsTab(t, lang) {
+  const bar = document.querySelector("[data-an-range]");
+  if (!bar) return;
+  anRenderRange("today", t, lang);
+  const hourlyHost = document.querySelector("[data-an-hourly]");
+  if (hourlyHost) {
+    hourlyHost.innerHTML = anStackedBar(24, AN_HOURLY.success, AN_HOURLY.failed, "var(--pl-accent)", "var(--pl-stage-dropped)", t);
+    anWireTooltips(hourlyHost);
+  }
+  bar.querySelectorAll("[data-range]").forEach((b) => b.addEventListener("click", () => {
+    bar.querySelectorAll("[data-range]").forEach((x) => x.setAttribute("aria-selected", x === b ? "true" : "false"));
+    anRenderRange(b.getAttribute("data-range"), t, lang);
+  }));
+}
+
 function renderPrep(lang) {
   const t = I18N[lang];
   // The real guard is Supabase RLS; this only decides what to paint. Any
@@ -1803,6 +2272,8 @@ function renderPrep(lang) {
   const tabs = [
     { id: "content", label: t.tab_content, panel: contentPanel },
     ...(isAdmin ? [{ id: "students", label: t.tab_students, panel: studentsPanel }] : []),
+    // Sandbox-only demo (2026-09-16) — see the ANALYTICS TAB block above.
+    ...(isAdmin ? [{ id: "analytics", label: t.tab_analytics, panel: analyticsPanel(t, lang) }] : []),
   ];
   // The tab you were on is where you come back to. Any re-render of this page
   // (language switch, hash route, an auth event) used to drop you back on the
@@ -1842,7 +2313,7 @@ function renderPrep(lang) {
   initPrepTabs();
   // Admin only: bind the "Add user" form once, then fetch + draw the roster. RLS
   // returns zero rows to non-admins, so this is safe even if the div is forced open.
-  if (isAdmin) { wireRosterAdd(lang); wireRemoveConfirm(); renderRoster(lang); }
+  if (isAdmin) { wireRosterAdd(lang); wireRemoveConfirm(); renderRoster(lang); initAnalyticsTab(t, lang); }
 }
 
 /* Which student-area tab is open. Module state so it survives a re-render, and
@@ -2141,6 +2612,18 @@ function wireRosterAdd(lang) {
 // never the READ/RENDER.
 async function addUser(lead, lang) {
   if (typeof lead === "string") lead = { email: lead };
+  // SANDBOX (2026-09-16): never write to the real shared allowlist table from
+  // here — mutate the local fake array and re-draw, same shape the real path
+  // leaves the table in.
+  if (IS_LOCAL) {
+    SANDBOX_FAKE_ROSTER.push({
+      id: "f" + Date.now(), name: lead.name || "", full_name: lead.name || "",
+      email: lead.email || "", on_list: true, confirmed: false, stage: "invited",
+      source: "", next_action: "", notes: "", phone: "", signed_in: false, first_signed_in_at: null,
+    });
+    renderRoster(lang);
+    return null;
+  }
   const payload = { added_by: (AUTH.user && AUTH.user.email) || null };
   if (lead.email) payload.email = lead.email;
   if (lead.name) payload.name = lead.name;
@@ -2161,6 +2644,14 @@ async function saveStudent(key, patch, statusEl, t) {
     statusEl.classList.toggle("roster__savemsg--err", ok === false);
     statusEl.classList.toggle("roster__savemsg--ok", ok === true);
   };
+  // SANDBOX (2026-09-16): never write to the real shared allowlist/RPC from
+  // here — patch the local fake array in place instead.
+  if (IS_LOCAL) {
+    const row = SANDBOX_FAKE_ROSTER.find((r) => (key.id && r.id === key.id) || (key.email && r.email === key.email));
+    if (row) Object.assign(row, patch);
+    setStatus(t ? t.roster_saved : "Saved", true);
+    return;
+  }
   try {
     let ok = false;
     // (a) Preferred: the admin_set_student RPC (email-keyed; coalesce keeps old on null).
@@ -2192,6 +2683,13 @@ async function saveStudent(key, patch, statusEl, t) {
 }
 
 async function confirmUser(email, next, lang) {
+  // SANDBOX (2026-09-16): patch the local fake array, never the real table.
+  if (IS_LOCAL) {
+    const row = SANDBOX_FAKE_ROSTER.find((r) => r.email === email);
+    if (row) row.confirmed = next;
+    renderRoster(lang);
+    return;
+  }
   await sb.from("allowlist").update({ confirmed: next }).eq("email", email);
   renderRoster(lang);
 }
@@ -2233,17 +2731,43 @@ async function removeUser(key, lang) {
   // key may be a bare email (legacy) or { id, email }. Prefer id so name-only
   // leads (nullable email) can still be removed.
   if (typeof key === "string") key = { email: key };
+  // SANDBOX (2026-09-16): remove from the local fake array, never the real table.
+  if (IS_LOCAL) {
+    const i = SANDBOX_FAKE_ROSTER.findIndex((r) => (key.id && r.id === key.id) || (key.email && r.email === key.email));
+    if (i > -1) SANDBOX_FAKE_ROSTER.splice(i, 1);
+    renderRoster(lang);
+    return;
+  }
   let q = sb.from("allowlist").delete();
   q = key.id ? q.eq("id", key.id) : q.eq("email", key.email);
   await q;
   renderRoster(lang);
 }
 
+/* FAKE DATA ONLY (sandbox repo, 2026-09-16, Ofir's explicit instruction): this
+   repo shares its Supabase project (same URL + anon key) with real
+   productlab-site, so admin_roster() would read/write REAL student data. Since
+   sign-in on this sandbox is already faked (see IS_LOCAL above) and this whole
+   page can be reached without real Google auth, the roster tab must never call
+   that RPC here — invented demo people only, same field shape the real RPC
+   returns, so the render logic below (pills, stage select, actions) is
+   untouched. Swap this array back for the real sb.rpc("admin_roster") call if
+   this sandbox is ever pointed at its own, non-shared Supabase project. */
+const SANDBOX_FAKE_ROSTER = [
+  { id: "f1", name: "דוגמה ישראלי", full_name: "דוגמה ישראלי", email: "demo1@example.com", on_list: true, confirmed: true, stage: "confirmed", source: "LinkedIn", next_action: "לשלוח תזכורת יום לפני", notes: "", phone: "", signed_in: true, first_signed_in_at: "2026-09-10T08:12:00Z" },
+  { id: "f2", name: "דמו כהן", full_name: "דמו כהן", email: "demo2@example.com", on_list: true, confirmed: true, stage: "attended", source: "הפניה", next_action: "", notes: "", phone: "", signed_in: true, first_signed_in_at: "2026-08-30T07:40:00Z" },
+  { id: "f3", name: "דמו לוי", full_name: "דמו לוי", email: "demo3@example.com", on_list: true, confirmed: false, stage: "call_booked", source: "פוסט Fleet", next_action: "לקבוע שיחת אינטייק", notes: "", phone: "", signed_in: false, first_signed_in_at: null },
+  { id: "f4", name: "דמו מזרחי", full_name: "דמו מזרחי", email: "demo4@example.com", on_list: true, confirmed: false, stage: "interested", source: "שאלון קדם-סדנה", next_action: "לחזור בעוד שבוע", notes: "", phone: "", signed_in: false, first_signed_in_at: null },
+  { id: "f5", name: "דמו אבידן", full_name: "דמו אבידן", email: "demo5@example.com", on_list: true, confirmed: false, stage: "invited", source: "", next_action: "", notes: "", phone: "", signed_in: false, first_signed_in_at: null },
+  { id: "f6", name: "דמו שני", full_name: "דמו שני", email: "demo6@example.com", on_list: true, confirmed: false, stage: "dropped", source: "קבוצת פייסבוק", next_action: "", notes: "התקרר, לא ענה פעמיים", phone: "", signed_in: false, first_signed_in_at: null },
+  { id: "f7", name: "", full_name: "", email: "demo7@example.com", on_list: false, confirmed: false, stage: "invited", source: "", next_action: "", notes: "", phone: "", signed_in: true, first_signed_in_at: "2026-09-14T18:05:00Z" },
+];
+
 async function renderRoster(lang) {
   const host = document.querySelector("[data-roster]");
   if (!host) return;
   const t = I18N[lang];
-  const { data: rows, error } = await sb.rpc("admin_roster");
+  const rows = SANDBOX_FAKE_ROSTER, error = null;
   if (error) { host.innerHTML = `<p class="roster__empty">${t.roster_empty}</p>`; return; }
   if (!rows || rows.length === 0) {
     host.innerHTML = `<p class="roster__empty">${t.roster_empty}</p>`;

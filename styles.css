@@ -912,6 +912,27 @@ button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
 .tabs__btn[aria-selected="true"] { color: var(--pl-accent); border-bottom-color: var(--pl-accent); }
 .tabpanel[hidden] { display: none; }
 
+/* .tabs--pill — a segmented pill control (EXTEND of .tabs, DS tokens only).
+   Ported into this sandbox fork from the recipe already approved by Ofir and
+   documented on productlab-site's real component-log (2026-09-14, the
+   upcoming/past sessions toggle) — that change predates this fork's clone and
+   was never on `main` there yet, so it wasn't present in this repo's CSS. Same
+   track everywhere the system uses it: --pl-bg-alt track, active segment lifts
+   to --pl-surface + --shadow-pl-sm, inactive stays flat/secondary text. Used
+   here for the analytics tab's time-range filter. */
+.tabs--pill {
+  border-bottom: none; display: inline-flex; gap: 2px;
+  background: var(--pl-bg-alt); border-radius: var(--radius-full); padding: 3px;
+}
+.tabs--pill .tabs__btn {
+  height: var(--ctl-sm); padding-inline: var(--space-4); margin-bottom: 0;
+  border-radius: var(--radius-full); border-bottom: none; font-weight: 600;
+}
+.tabs--pill .tabs__btn:hover { color: var(--pl-fg); }
+.tabs--pill .tabs__btn[aria-selected="true"] {
+  background: var(--pl-surface); color: var(--pl-fg); box-shadow: var(--shadow-pl-sm); border-bottom: none;
+}
+
 /* ---- Admin roster (Registered students) - admin-only, DS tokens only ------ */
 .roster__loading, .roster__empty {
   color: var(--pl-fg-secondary); font-size: var(--text-sm); font-weight: 500;
@@ -1025,6 +1046,14 @@ button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
 }
 .roster__badge--warn {
   background: color-mix(in srgb, var(--pl-crew-orange) 16%, transparent); color: var(--pl-crew-orange);
+}
+/* EXTEND, 2026-09-16 (analytics tab, sandbox demo) — the roster table only
+   ever needed 2 severities (ok/warn); the flagged-events table needs a 3rd
+   (blocked/failed). Same tint recipe as --ok/--warn, on the token
+   .btn--danger already uses — no new hex. Self-audited (Task tool
+   unavailable this session); flag for a real DSL sign-off. */
+.roster__badge--danger {
+  background: color-mix(in srgb, var(--pl-stage-dropped) 14%, transparent); color: var(--pl-stage-dropped);
 }
 .roster__access { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
 .roster__yes {
@@ -2664,3 +2693,53 @@ html.pl-zoom .hero__bg{ animation: hero-zoom 1200ms cubic-bezier(0.22, 0.61, 0.3
 }
 @media (prefers-reduced-motion: reduce) { .reader, .reader__bar span { animation: none; } .reader__bar span { width: 100%; opacity: 0.4; } }
 
+
+/* =============================================================================
+   ANALYTICS TAB (sandbox demo, 2026-09-16) — KPI tiles, chart chrome, tooltip.
+   NEW primitives (nothing chart-shaped existed in this system before this) —
+   DS tokens only, zero new hex. `.chart-card`/`.stat-tile` compose the
+   existing `.card` base (background/border/radius/shadow) via a combined
+   class, not a duplicate. Self-audited (Task tool unavailable this session);
+   flag for a real Design System Lead pass before this is treated as canonical.
+   ========================================================================== */
+.kpi-row { display: grid; gap: var(--space-4); grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .kpi-row { grid-template-columns: 1fr; } }
+
+.stat-tile { padding: 1.25rem 1.4rem; }
+.stat-tile__label { display: block; font-size: var(--text-sm); font-weight: 600; color: var(--pl-fg-secondary); margin-top: var(--space-1); }
+.stat-tile__row { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-1); }
+/* Proportional figures on a hero-ish standalone number, per the dataviz stat-
+   tile spec — tabular-nums is reserved for columns that must align (the table
+   below), never a single large value. */
+.stat-tile__value { font-size: 1.9rem; font-weight: 700; color: var(--pl-fg); line-height: 1; }
+.stat-tile__spark { flex: none; display: block; }
+.stat-tile__foot { display: flex; align-items: baseline; gap: var(--space-2); margin-top: var(--space-2); }
+.stat-tile__delta { font-size: var(--text-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--pl-fg-secondary); }
+.stat-tile__delta--good { color: var(--pl-stage-confirmed); }
+.stat-tile__delta--bad { color: var(--pl-stage-dropped); }
+.stat-tile__sub { font-size: var(--text-caption); color: var(--pl-fg-muted); }
+
+.chart-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.chart-card__head h3 { font-size: var(--text-h3); }
+.chart-card__sub { font-size: var(--text-sm); color: var(--pl-fg-secondary); margin-top: 0.2rem; }
+.chart-card__canvas { margin-top: var(--space-4); aspect-ratio: 640 / 200; width: 100%; }
+.chart-card__canvas .an-svg { display: block; }
+
+.chart-legend { display: flex; gap: var(--space-4); flex-wrap: wrap; }
+.chart-legend__item { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--pl-fg-secondary); }
+.chart-legend__swatch { width: 10px; height: 10px; border-radius: var(--radius-sm); flex: none; }
+
+/* Hit targets are invisible by default (the visible mark already carries the
+   value/color); a visible wash on hover AND keyboard focus is the only
+   affordance, per the dataviz rule that focus must show what hover shows. */
+.an-hit { outline: none; cursor: pointer; }
+.an-hit:hover, .an-hit:focus-visible { fill: color-mix(in srgb, var(--pl-fg) 8%, transparent) !important; }
+
+.chart-tooltip {
+  position: fixed; z-index: 60; pointer-events: none;
+  background: var(--pl-tooltip-bg); color: var(--pl-tooltip-fg);
+  font-size: var(--text-caption); font-weight: 600; line-height: 1.4;
+  padding: 0.4rem 0.65rem; border-radius: var(--radius-md); box-shadow: var(--shadow-pl-md);
+  max-width: 240px; white-space: nowrap; direction: ltr; text-align: start;
+}
