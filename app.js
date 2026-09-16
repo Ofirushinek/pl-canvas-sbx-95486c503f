@@ -2807,16 +2807,18 @@ async function renderRoster(lang) {
     const phone = r.phone || "";
     const name = r.name || r.full_name || "";
 
-    // Actions: gate-crasher -> Add to list; on-list -> confirm (email only) + remove.
+    // Actions column: remove only (canvas edit, 2026-09-16 — Ofir moved the
+    // confirm/unconfirm action into the access column below, next to what it
+    // actually controls; the status pill + signed-in moment it displaced move
+    // into the detail row's log instead of disappearing).
     let actions;
+    const confirmBtn = r.on_list && r.email
+      ? `<button type="button" class="btn ${r.confirmed ? "btn--ghost" : "btn--primary"} btn--sm" data-confirm="${escapeAttr(r.email)}" data-next="${r.confirmed ? "0" : "1"}">${r.confirmed ? t.roster_unconfirm : t.roster_confirm}</button>`
+      : "";
     if (!r.on_list) {
       actions = `<button type="button" class="btn btn--ghost btn--sm" data-add="${escapeAttr(r.email || "")}">${t.roster_add_to_list}</button>`;
     } else {
-      const confirmBtn = r.email
-        ? `<button type="button" class="btn ${r.confirmed ? "btn--ghost" : "btn--primary"} btn--sm" data-confirm="${escapeAttr(r.email)}" data-next="${r.confirmed ? "0" : "1"}">${r.confirmed ? t.roster_unconfirm : t.roster_confirm}</button>`
-        : "";
-      actions = `${confirmBtn}
-         <button type="button" class="btn btn--ghost btn--danger btn--sm roster__remove" data-remove-ask="${i}" aria-label="${t.roster_remove}" data-tooltip="${t.roster_remove}">${I.trash}</button>`;
+      actions = `<button type="button" class="btn btn--ghost btn--danger btn--sm roster__remove" data-remove-ask="${i}" aria-label="${t.roster_remove}" data-tooltip="${t.roster_remove}">${I.trash}</button>`;
     }
 
     // Name and email are ONE cell (the email is a second line, not a column of
@@ -2837,7 +2839,7 @@ async function renderRoster(lang) {
           <button type="button" class="roster__expand${open ? " is-open" : ""}" data-expand="${i}" aria-expanded="${open ? "true" : "false"}" aria-label="${t.roster_details}" data-tooltip="${t.roster_details}">${I.chev}</button>
         </td>
         <td data-label="${t.roster_col_name}" class="roster__stack">${person}</td>
-        <td data-label="${t.roster_col_status}"><span class="roster__access">${pill}${signedIn}</span></td>
+        <td data-label="${t.roster_col_status}">${r.on_list ? confirmBtn : pill}</td>
         <td data-label="${t.roster_col_stage}">${stageSelect(i, stage)}</td>
         <td data-label="${t.roster_col_source}" class="roster__stack roster__free" dir="${textDir(source, "auto")}">${escapeHtml(source) || `<span class="roster__none">—</span>`}</td>
         <td data-label="${t.roster_col_next}" class="roster__stack roster__nextcell">${nextActionHtml(next, lang)}</td>
@@ -2846,6 +2848,10 @@ async function renderRoster(lang) {
       <tr class="roster__detailrow" data-detail="${i}"${open ? "" : " hidden"}>
         <td colspan="7">
           <div class="roster__detail">
+            <div class="roster__field">
+              <span class="roster__fieldlbl">${t.roster_col_status}</span>
+              <span class="roster__access">${pill}${signedIn}</span>
+            </div>
             <label class="roster__field">
               <span class="roster__fieldlbl">${t.roster_col_source}</span>
               <textarea class="roster__ta" data-field="source" data-i="${i}" data-grow rows="1" dir="auto" placeholder="${escapeAttr(t.roster_source_ph)}">${escapeHtml(source)}</textarea>
