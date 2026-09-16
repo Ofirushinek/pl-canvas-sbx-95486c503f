@@ -2705,8 +2705,11 @@ html.pl-zoom .hero__bg{ animation: hero-zoom 1200ms cubic-bezier(0.22, 0.61, 0.3
    NEW primitives (nothing chart-shaped existed in this system before this) —
    DS tokens only, zero new hex. `.chart-card`/`.stat-tile` compose the
    existing `.card` base (background/border/radius/shadow) via a combined
-   class, not a duplicate. Self-audited (Task tool unavailable this session);
-   flag for a real Design System Lead pass before this is treated as canonical.
+   class, not a duplicate.
+   Design System Lead pass DONE 2026-09-16 (see `.barchart` further down and
+   `design-system/product-lab/component-log.md` same date in the vault): the
+   stacked-bar chart is now div-based for canvas-editability; KPI tiles + the
+   events table were confirmed clean REUSE as-is. Canonical.
    ========================================================================== */
 .kpi-row { display: grid; gap: var(--space-4); grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
@@ -2738,9 +2741,16 @@ html.pl-zoom .hero__bg{ animation: hero-zoom 1200ms cubic-bezier(0.22, 0.61, 0.3
 
 /* Hit targets are invisible by default (the visible mark already carries the
    value/color); a visible wash on hover AND keyboard focus is the only
-   affordance, per the dataviz rule that focus must show what hover shows. */
+   affordance, per the dataviz rule that focus must show what hover shows.
+   ONE recipe for both hit-target shapes the system has: `fill` styles the
+   SVG version (anLineChart's dots), `background` styles the div version
+   (`.barchart__hit`, 2026-09-16) — each property is a no-op on the other
+   element type, so one rule serves both without drift. */
 .an-hit { outline: none; cursor: pointer; }
-.an-hit:hover, .an-hit:focus-visible { fill: color-mix(in srgb, var(--pl-fg) 8%, transparent) !important; }
+.an-hit:hover, .an-hit:focus-visible {
+  fill: color-mix(in srgb, var(--pl-fg) 8%, transparent) !important;
+  background: color-mix(in srgb, var(--pl-fg) 8%, transparent);
+}
 
 .chart-tooltip {
   position: fixed; z-index: 60; pointer-events: none;
@@ -2749,3 +2759,35 @@ html.pl-zoom .hero__bg{ animation: hero-zoom 1200ms cubic-bezier(0.22, 0.61, 0.3
   padding: 0.4rem 0.65rem; border-radius: var(--radius-md); box-shadow: var(--shadow-pl-md);
   max-width: 240px; white-space: nowrap; direction: ltr; text-align: start;
 }
+
+/* Div-based stacked-bar chart (`.barchart`) — see anStackedBar() in app.js for
+   why this is HTML/CSS, not SVG. Percentages are relative to explicit
+   ancestor heights the whole way down (`.chart-card__canvas` sets the
+   640:200 aspect ratio, `.barchart` restates it so the component also works
+   standalone in Storybook), so every bar/gridline/label is a real box a
+   canvas tool can select, move and resize on its own. */
+.barchart { position: relative; width: 100%; aspect-ratio: 640 / 200; direction: ltr; }
+.barchart__grid, .barchart__cols {
+  position: absolute; top: 7%; bottom: 13%; left: 4.6875%; right: 1.5625%;
+}
+.barchart__gridline { position: absolute; left: 0; right: 0; height: 1px; background: var(--pl-border); }
+.barchart__gridlabel {
+  position: absolute; left: 0; transform: translate(calc(-100% - 6px), -50%);
+  font-size: 10px; color: var(--pl-fg-muted);
+}
+.barchart__cols { display: flex; align-items: flex-end; }
+.barchart__col { position: relative; flex: 1 1 0; height: 100%; }
+/* 80% of the column, not the bar — matches the old SVG hit rect, which was
+   always wider than the 62% bar. Painted AFTER (on top of) the bar itself,
+   same stacking the old SVG used (hit shape drawn last) — so the hover tint
+   washes over the visible bar too, not just the padding beside it. */
+.barchart__hit { position: absolute; inset: 0 auto 0 50%; width: 80%; transform: translateX(-50%); }
+.barchart__stack {
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: 62%; max-width: 24px; height: 100%;
+  display: flex; flex-direction: column-reverse; gap: 2px;
+}
+.barchart__seg { flex: none; }
+.barchart__seg--failed { border-top-left-radius: var(--radius-sm); border-top-right-radius: var(--radius-sm); }
+.barchart__xlabels { position: absolute; left: 4.6875%; right: 1.5625%; bottom: 0; height: 13%; display: flex; }
+.barchart__xlabel { flex: 1 1 0; text-align: center; font-size: 10px; color: var(--pl-fg-muted); }

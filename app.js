@@ -1792,48 +1792,54 @@ function anLineChart(labels, values, colorVar, fmt) {
 }
 
 /* Stacked-bar hourly chart (success + failed, one shared count axis — see the
-   anti-pattern note above for why this is safe despite the magnitude gap). */
+   anti-pattern note above for why this is safe despite the magnitude gap).
+   DIV-BASED, not SVG (2026-09-16, Design System Lead pass — see
+   `design-system/product-lab/component-log.md` same date for the full
+   ruling). Every bar/gridline/label is a real positioned HTML element with
+   CSS width/height, not an SVG x/y-attribute shape, so each one is a real,
+   independently selectable/draggable UI element in the Capture/Return canvas
+   tool. `anLineChart`/`anSparkline` stay SVG on purpose: nobody drags a point
+   inside a 30-point trend line or a 7-point sparkline any more than they'd
+   edit inside an icon glyph — same "don't need to edit icon insides" carve-out
+   Ofir named for the canvas tool, applied to dense/decorative dataviz marks.
+   NEW system organism `.barchart` (+ `.barchart__*` children), built only
+   from existing tokens (`--pl-border`, `--pl-fg-muted`, `--radius-sm`,
+   the shared `.an-hit`-family hover recipe) — zero new hex, zero new
+   component doing the same job as another.
+   Bar/hit-to-column ratios (62% / 80%) are the exact percentages the old SVG
+   math always produced for this chart's fixed `hours=24` (band = plotW/24,
+   barW = band*0.62, hit = max(barW,20) = 20 = band*0.8) — re-derive both if
+   this function is ever called with a different `hours` value. */
 function anStackedBar(hours, success, failed, colorA, colorB, t) {
-  const W = 640, H = 200, padL = 30, padR = 10, padT = 14, padB = 26;
-  const plotW = W - padL - padR, plotH = H - padT - padB;
   const n = hours;
   const totals = success.map((v, i) => v + failed[i]);
   const max = anNiceMax(Math.max(...totals));
-  const band = plotW / n;
-  const barW = Math.min(24, band * 0.62);
-  const gap = 2; // surface-gap between the two stacked segments, per mark spec
-  const y = (v) => padT + plotH - (plotH * v) / max;
   const ticks = [0, 0.5, 1].map((f) => Math.round(max * f));
   const grid = ticks.map((v) => {
-    const gy = y(v);
-    return `<line x1="${padL}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="var(--pl-border)" stroke-width="1"/>
-      <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" font-size="10" fill="var(--pl-fg-muted)">${v}</text>`;
+    const topPct = (100 - (v / max) * 100).toFixed(2);
+    return `<div class="barchart__gridline" style="top:${topPct}%"></div>
+      <span class="barchart__gridlabel" style="top:${topPct}%">${v}</span>`;
   }).join("");
-  const bars = [];
+  const cols = [];
   for (let i = 0; i < n; i++) {
-    const cx = padL + band * i + band / 2;
-    const bx = cx - barW / 2;
-    const sH = (plotH * success[i]) / max;
-    const fH = (plotH * failed[i]) / max;
-    const baseline = padT + plotH;
-    const sy = baseline - sH;
-    const fy = failed[i] > 0 ? sy - gap - fH : sy;
-    // Bottom segment (success): square top (it butts the gap), square baseline.
-    if (success[i] > 0) bars.push(`<rect x="${bx.toFixed(1)}" y="${sy.toFixed(1)}" width="${barW.toFixed(1)}" height="${sH.toFixed(1)}" fill="${colorA}"/>`);
-    // Top segment (failed): 4px rounded top corners only, per the mark spec.
-    if (failed[i] > 0) bars.push(`<path d="M${bx.toFixed(1)},${(fy + fH).toFixed(1)} L${bx.toFixed(1)},${(fy + 4).toFixed(1)} Q${bx.toFixed(1)},${fy.toFixed(1)} ${(bx + 4).toFixed(1)},${fy.toFixed(1)} L${(bx + barW - 4).toFixed(1)},${fy.toFixed(1)} Q${(bx + barW).toFixed(1)},${fy.toFixed(1)} ${(bx + barW).toFixed(1)},${(fy + 4).toFixed(1)} L${(bx + barW).toFixed(1)},${(fy + fH).toFixed(1)} Z" fill="${colorB}"/>`);
+    const sPct = ((success[i] / max) * 100).toFixed(2);
+    const fPct = ((failed[i] / max) * 100).toFixed(2);
     const tip = escapeAttr(`${String(i).padStart(2, "0")}:00 — ${t.an_legend_success}: ${success[i]}, ${t.an_legend_failed}: ${failed[i]}`);
-    bars.push(`<rect data-tip="${tip}" tabindex="0" role="img" aria-label="${tip}"
-        x="${bx.toFixed(1)}" y="${padT}" width="${Math.max(barW, 20).toFixed(1)}" height="${plotH.toFixed(1)}" fill="transparent" class="an-hit"></rect>`);
+    cols.push(`<div class="barchart__col">
+        <div class="barchart__stack">
+          ${success[i] > 0 ? `<div class="barchart__seg barchart__seg--success" style="height:${sPct}%;background:${colorA}"></div>` : ""}
+          ${failed[i] > 0 ? `<div class="barchart__seg barchart__seg--failed" style="height:${fPct}%;background:${colorB}"></div>` : ""}
+        </div>
+        <div class="barchart__hit an-hit" data-tip="${tip}" tabindex="0" role="img" aria-label="${tip}"></div>
+      </div>`);
   }
-  const xLabels = [0, 6, 12, 18].map((h) => {
-    const cx = padL + band * h + band / 2;
-    return `<text x="${cx.toFixed(1)}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--pl-fg-muted)">${String(h).padStart(2, "0")}</text>`;
-  }).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" dir="ltr" class="an-svg" data-an-bar>
-    ${grid}${bars.join("")}${xLabels}
-    <line data-an-crosshair x1="0" x2="0" y1="0" y2="0" opacity="0"/>
-  </svg>`;
+  const xlabels = Array.from({ length: n }, (_, h) =>
+    `<span class="barchart__xlabel">${h % 6 === 0 ? String(h).padStart(2, "0") : ""}</span>`).join("");
+  return `<div class="barchart" dir="ltr" data-an-bar>
+    <div class="barchart__grid">${grid}</div>
+    <div class="barchart__cols">${cols.join("")}</div>
+    <div class="barchart__xlabels">${xlabels}</div>
+  </div>`;
 }
 
 /* Tiny 7-point sparkline for a KPI tile — de-emphasis gray, endpoint dot in the
